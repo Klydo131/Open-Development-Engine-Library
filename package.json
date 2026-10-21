@@ -27,7 +27,7 @@
     "@axe-core/playwright": "4.13.0",
     "@electric-sql/pglite": "0.5.10",
     "@playwright/test": "1.63.0",
-    "@types/node": "26.5.1",
+    "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "fake-indexeddb": "6.2.5",
