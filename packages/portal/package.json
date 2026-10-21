@@ -1,0 +1,10 @@
+{
+  "name": "@open-learning-rooms/portal",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Provider-neutral course catalog and learner support contracts.",
+  "exports": {".": {"types": "./dist/index.d.ts", "import": "./dist/index.js"}},
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": false
+}

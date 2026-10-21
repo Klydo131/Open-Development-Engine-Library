@@ -1,0 +1,81 @@
+name: Library checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: library-checks-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: 'true'
+  npm_config_ignore_scripts: 'true'
+
+jobs:
+  engine:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned package manager
+        run: npm install --global pnpm@11.19.0 --ignore-scripts
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.19.0'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test:ci
+      - run: pnpm build
+      - run: pnpm check:bundle
+      - run: pnpm test:packages
+      - name: Check known dependency advisories
+        run: pnpm audit --audit-level=high
+
+  browsers:
+    needs: engine
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned package manager
+        run: npm install --global pnpm@11.19.0 --ignore-scripts
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.19.0'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm build
+      - name: Install reviewed Playwright browser versions
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - name: Check browser journeys
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: pnpm exec playwright test --workers=1 --shard="$SHARD/3" --reporter=line --trace=off
+
+  ci:
+    if: always()
+    needs: [engine, browsers]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require every gate
+        env:
+          ENGINE: ${{ needs.engine.result }}
+          BROWSERS: ${{ needs.browsers.result }}
+        run: test "$ENGINE" = success && test "$BROWSERS" = success

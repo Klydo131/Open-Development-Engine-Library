@@ -1,0 +1,10 @@
+{
+  "name": "@open-learning-rooms/education",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Optional private learning briefs, attempts, selected submissions and feedback for a digital library.",
+  "exports": {".": {"types": "./dist/index.d.ts", "import": "./dist/index.js"}},
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": false
+}

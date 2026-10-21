@@ -1,0 +1,23 @@
+{
+  "name": "@open-learning-rooms/core",
+  "version": "0.2.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Portable private digital library catalog, collections, metadata search, content integrity and encrypted bundles.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./indexeddb": {
+      "types": "./dist/indexeddb-store.d.ts",
+      "import": "./dist/indexeddb-store.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false
+}

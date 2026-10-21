@@ -1,0 +1,40 @@
+import {mkdtempSync,mkdirSync,readFileSync,readdirSync,writeFileSync} from 'node:fs';
+import {join,resolve} from 'node:path';
+import {execFileSync} from 'node:child_process';
+import assert from 'node:assert/strict';
+const root=process.cwd(),manager=process.env.npm_execpath;
+if(!manager)throw new Error('Run through pnpm test:packages.');
+mkdirSync('.lab',{recursive:true});const lab=mkdtempSync(resolve('.lab/packages-'));
+const tarballs=join(lab,'tarballs'),consumer=join(lab,'consumer');mkdirSync(tarballs);mkdirSync(consumer);
+const pnpm=(args:string[],cwd=root)=>execFileSync(process.execPath,[manager,...args],{cwd,stdio:'pipe',env:{...process.env,npm_config_ignore_scripts:'true'}});
+for(const name of ['core','education','portal']){
+  const pkg=JSON.parse(readFileSync(`packages/${name}/package.json`,'utf8'));
+  assert.equal(Object.keys(pkg.dependencies??{}).length,0,'Engine packages must remain dependency-free.');
+  assert.equal(Object.keys(pkg.peerDependencies??{}).length,0);
+  pnpm(['pack','--pack-destination',tarballs],resolve(`packages/${name}`));
+}
+const dependencies=Object.fromEntries(readdirSync(tarballs).filter(file=>file.endsWith('.tgz')).map(file=>{
+  const name=['core','education','portal'].find(name=>file.startsWith(`open-learning-rooms-${name}-`));assert.ok(name);return [`@open-learning-rooms/${name}`,`file:../tarballs/${file}`];
+}));assert.equal(Object.keys(dependencies).length,3);
+writeFileSync(join(consumer,'package.json'),JSON.stringify({name:'isolated-engine-consumer',private:true,type:'module',dependencies}));
+writeFileSync(join(consumer,'pnpm-workspace.yaml'),'packages: []\n');
+pnpm(['install','--offline','--ignore-scripts','--ignore-workspace'],consumer);
+writeFileSync(join(consumer,'check.mjs'),`import assert from 'node:assert/strict';
+import {createCatalog,validateCatalog} from '@open-learning-rooms/core';
+import * as indexeddb from '@open-learning-rooms/core/indexeddb';
+import {emptyEducation,validateEducation} from '@open-learning-rooms/education';
+import {validateCourse} from '@open-learning-rooms/portal';
+assert.equal(validateCatalog(createCatalog()).version,1);
+assert.ok(Object.keys(indexeddb).length);
+assert.deepEqual(validateEducation(emptyEducation()),emptyEducation());
+assert.throws(()=>validateCourse({unexpected:'private field'}));
+console.log('Three packed engine packages and IndexedDB entry imported without app or React dependencies.');`);
+execFileSync(process.execPath,[join(consumer,'check.mjs')],{cwd:consumer,stdio:'inherit'});
+writeFileSync(join(consumer,'check.ts'),`import {createCatalog,type Catalog} from '@open-learning-rooms/core';
+import {emptyEducation,type EducationState} from '@open-learning-rooms/education';
+import {validateCourse,type CoursePortal} from '@open-learning-rooms/portal';
+const catalog:Catalog=createCatalog();const education:EducationState=emptyEducation();
+let provider:CoursePortal|null=null;void [catalog,education,provider,validateCourse];`);
+writeFileSync(join(consumer,'tsconfig.json'),JSON.stringify({compilerOptions:{noEmit:true,strict:true,skipLibCheck:true,target:'ES2022',module:'NodeNext',moduleResolution:'NodeNext',types:[]},include:['check.ts']}));
+execFileSync(process.execPath,[join(root,'node_modules/typescript/bin/tsc'),'-p',join(consumer,'tsconfig.json')],{cwd:consumer,stdio:'inherit'});
+console.log('External TypeScript consumer passed. Package artifacts stay in the local lab.');
