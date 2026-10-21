@@ -40,8 +40,10 @@ presence here does not imply a configured online service or enabled feature.
 
 When distributing the built web application, include this document with the
 generated assets and make the notices available to recipients. Preserve license
-comments retained by the build. This source notice file is not automatically
-copied into the web build by the current build configuration.
+comments retained by the build. The web build emits this document as
+`THIRD_PARTY_NOTICES.md` and the project's license as `LICENSE` beside its
+entries. `pnpm check:bundle` rejects missing or changed copies. Keep those files
+with the assets when copying or deploying the output directory.
 
 ## React, React DOM and Scheduler — MIT
 
