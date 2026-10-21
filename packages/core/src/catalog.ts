@@ -175,15 +175,21 @@ export function deleteAsset(catalog: Catalog, assetId: string): Catalog {
 export type CatalogSearch = {query?: string; kind?: ResourceKind; collectionId?: string; subject?: string; language?: string};
 function normalized(value: string): string {return value.normalize('NFKC').toLowerCase();}
 export function searchCatalog(catalog: Catalog, filter: CatalogSearch = {}): Resource[] {
+  const options = record(filter); keys(options, ['query', 'kind', 'collectionId', 'subject', 'language']);
+  const kind = options.kind;
+  if (kind !== undefined && !kinds.includes(kind as ResourceKind)) fail('Unsupported resource kind.');
+  const tokens = normalized(text(options.query === undefined ? '' : options.query, 2000)).split(/\s+/u).filter(Boolean);
+  const collectionId = options.collectionId === undefined ? undefined : id(options.collectionId);
+  const subject = options.subject === undefined ? undefined : normalized(text(options.subject, 200));
+  const language = options.language === undefined ? undefined : normalized(text(options.language, 80));
   const current = validateCatalog(catalog);
-  const tokens = normalized(text(filter.query ?? '', 2000)).split(/\s+/u).filter(Boolean);
-  const selected = filter.collectionId === undefined ? undefined : current.collections.find(item => item.id === filter.collectionId);
-  if (filter.collectionId !== undefined && !selected) return [];
+  const selected = collectionId === undefined ? undefined : current.collections.find(item => item.id === collectionId);
+  if (collectionId !== undefined && !selected) return [];
   const matches = current.resources.filter(item => {
-    if (filter.kind !== undefined && item.kind !== filter.kind) return false;
+    if (kind !== undefined && item.kind !== kind) return false;
     if (selected && !selected.resourceIds.includes(item.id)) return false;
-    if (filter.subject !== undefined && !item.subjects.some(value => normalized(value) === normalized(filter.subject!))) return false;
-    if (filter.language !== undefined && !item.languages.some(value => normalized(value) === normalized(filter.language!))) return false;
+    if (subject !== undefined && !item.subjects.some(value => normalized(value) === subject)) return false;
+    if (language !== undefined && !item.languages.some(value => normalized(value) === language)) return false;
     const searchable = normalized([item.title, item.description, ...item.creators, ...item.languages, ...item.subjects].join('\n'));
     return tokens.every(token => searchable.includes(token));
   });
