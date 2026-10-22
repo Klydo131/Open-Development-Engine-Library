@@ -105,6 +105,7 @@ See [Education](docs/EDUCATION.md) and [Security](SECURITY.md).
 - [Guided study](docs/AGE-INCLUSIVE-STUDY.md)
 - [Classroom authorization and abuse-control references](docs/CLASSROOM-AUTHORIZATION.md)
 - [Course and support portal](docs/COURSE-PORTAL.md)
+- [Bounded provider transport](docs/HTTP-TRANSPORT.md)
 - [Hosting examples](docs/HOSTING.md)
 - [CI and deployment boundaries](docs/CI-CD.md)
 - [Browser and accessibility testing](docs/APPLE-TESTING.md)
