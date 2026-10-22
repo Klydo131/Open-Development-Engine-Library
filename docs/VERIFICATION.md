@@ -163,3 +163,41 @@ Formal Codex Security review remains incomplete after the prior scan-start error
 The source remains a local alpha; no GitHub publication or deployment occurred.
 See [study evidence](AGE-INCLUSIVE-STUDY.md), [portal setup](COURSE-PORTAL.md) and
 [CI/CD boundaries](CI-CD.md).
+
+## Source publication and search validation — 2026-10-22
+
+The provisional project name is Open Development Engine Library. Existing
+package names, storage keys and encrypted formats remain unchanged. Source is
+available in the [project repository](https://github.com/Klydo131/Open-Development-Engine-Library);
+publication is not a production deployment or certification.
+
+Before initial publication, 190 unit/contract/SDK/PostgreSQL checks and 34 scoped
+browser cases passed: four private-room journeys across seven profiles plus
+six selected-state accessibility cases. Lint, types, build, packed consumers
+and bundle budgets passed. A fresh advisory response reported zero known
+vulnerabilities for the checked lockfile.
+
+The follow-up rejects malformed search options before empty-result shortcuts
+and normalizes filter inputs once. Six focused regressions first produced two
+passes/four failures; after correction, all 19 search/catalog cases passed.
+The full suite passed 196 checks without failures, skips or cancellations.
+The catalog metadata/creator-search/collection journey then passed on all seven
+functional profiles. These scoped checks do not repeat every historical case.
+
+The web build now emits `LICENSE` and `THIRD_PARTY_NOTICES.md`; the bundle check
+compares both with source. Four artifact checks rejected each file when missing
+and when changed, then verified successful restoration and a passing healthy
+output. A review also corrected a mismatched license filename so the notice's
+relative license link resolves in source and built distributions.
+
+Final lint/types/build and three packed engines with isolated ESM/TypeScript
+consumers passed. Initial gzip bytes are 107,462 JavaScript/8,562 CSS for private
+rooms and 136,919/10,432 for the portal, within existing budgets. No dependencies
+or lockfile resolutions changed in the follow-up. Hosted results belong to the
+specific [GitHub Actions run](https://github.com/Klydo131/Open-Development-Engine-Library/actions);
+local success does not imply the hosted final gate passed.
+
+The historical WebKit native-date trigger remains unconfirmed. Physical-device,
+assistive-technology, learning-outcome, live-provider, formal security and
+operator-specific legal checks remain pending. See [search semantics](SEARCH.md),
+[dependency notices](../THIRD_PARTY_NOTICES.md) and [CI/CD limits](CI-CD.md).

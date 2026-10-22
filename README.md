@@ -112,6 +112,8 @@ See [the education workflow and sharing boundary](docs/EDUCATION.md).
 
 ## Documentation
 
+- [Changes and compatibility notes](CHANGELOG.md)
+- [Catalog search options and matching](docs/SEARCH.md)
 - [Architecture and integration boundaries](docs/ARCHITECTURE.md)
 - [Data formats, backups and migration](docs/FORMAT.md)
 - [Hosting and optional Supabase example](docs/HOSTING.md)

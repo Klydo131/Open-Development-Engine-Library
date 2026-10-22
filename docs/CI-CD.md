@@ -21,6 +21,12 @@ once per entry. Missing assets fail the check. Dynamic imports are excluded
 from this initial transfer budget. These deterministic byte limits are regression
 checks, not a claim about device response time or Core Web Vitals.
 
+The same check requires built `LICENSE` and `THIRD_PARTY_NOTICES.md` to match
+their source files. The build emits these assets through the
+[Vite plugin interface](https://vite.dev/guide/api-plugin.html), using the
+[bundler's asset emission](https://rolldown.rs/reference/Interface.PluginContext#emitfile).
+Copy the complete output directory when distributing or deploying it.
+
 Local build measured on 2026-10-21:
 
 | Entry | Initial JavaScript gzip | Initial CSS gzip |
