@@ -63,12 +63,12 @@ Before using remote storage with real data, verify in a disposable project:
    backups behave according to the operator's published policy.
 
 Mock HTTP tests can verify adapter request handling. They do not prove that
-a live database enforces its RLS policies. No live RLS verification has been
-completed for this milestone.
+a live database enforces its RLS policies. The example requires verification
+against the configured deployment.
 
 Consult the [Supabase changelog](https://supabase.com/changelog) before adapting
 the example. Provider behavior and supported clients change over time.
 
-The newer [course/support portal](COURSE-PORTAL.md) is a distinct adapter and
-schema. It is not vault synchronization. Prepared [CI gates](CI-CD.md) run checks
+The [course/support portal](COURSE-PORTAL.md) is a distinct adapter and
+schema. It is not vault synchronization. The [CI gates](CI-CD.md) run checks
 without deploying either service.

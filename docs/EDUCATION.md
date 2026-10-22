@@ -131,8 +131,7 @@ See [architecture](ARCHITECTURE.md) and the
 Strict allowlists reject unexpected fields. Canonical source links accept HTTP
 or HTTPS without embedded credentials; an empty link supports a text citation.
 Text is rendered as text, not executed as HTML. This exchange format carries no
-raw files and is not a malware scanner. Future attachment exchange needs a
-separate content-handling boundary, not merely another field in this format.
+raw files and does not scan or sanitize content for malware.
 
 The optional server authorization and abuse-control modules are executable
 references, not active protection for a hosted service. A real deployment must
@@ -147,11 +146,6 @@ See [the reference contract and hosted acceptance gates](CLASSROOM-AUTHORIZATION
 Review the current [verification record](VERIFICATION.md), run the relevant
 suite for the exact build, and complete physical-device and assistive-technology
 checks before promising support. Automated WebKit profiles do not certify every
-Apple product. There is no independent security certification, worldwide legal
-clearance, proven learning-outcome claim or prediction of protection against
-future attacks. Hosted school/minor-user use requires institution-specific
+Apple product. Automated checks do not establish security certification, legal
+compliance or learning effectiveness. Hosted educational use requires institution-specific
 privacy, safeguarding, retention, accessibility and incident arrangements.
-
-[The research brief](EDUCATION-AND-SECURITY-RESEARCH.md) records the primary
-sources behind the learning cycle and release gates. It distinguishes design
-evidence from educational efficacy and deployment-specific compliance.

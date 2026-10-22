@@ -141,8 +141,8 @@ Limits are exported as `CATALOG_LIMITS`. Sizes use binary units.
 
 Field-specific string and reference limits also apply; consult the validator
 for the complete bounds. This snapshot format base64-encodes assets and keeps
-complete data in memory. It is intended for small private libraries at this
-milestone. Browser quota may be lower than format limits.
+complete data in memory. It is intended for small private libraries. Browser
+quota may be lower than format limits.
 
 ## Original learning format
 

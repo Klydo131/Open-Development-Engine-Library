@@ -52,9 +52,9 @@ application must also guard its session lifecycle and decide how to retire local
 copies. The example's legacy bridge migrates in memory before the same conditional
 commit, without a preliminary storage save.
 
-## Research basis
+## Cryptographic boundary
 
-Reviewed 16 October 2026: [OWASP Cryptographic Storage guidance](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)
+See [OWASP Cryptographic Storage guidance](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)
 and [OWASP Key Management guidance](https://cheatsheetseries.owasp.org/cheatsheets/Key_Management_Cheat_Sheet).
 These sources inform the distinction between replacing active encryption and
 retaining access to older encrypted copies. Our bounded single-user design uses

@@ -1,4 +1,4 @@
-# Safe, bounded delivery checks
+# CI checks and deployment boundaries
 
 The [GitHub Actions workflow](https://github.com/Klydo131/Open-Development-Engine-Library/actions/workflows/ci.yml)
 runs checks only. It configures no deployment or release. Hosted results and
@@ -21,28 +21,19 @@ once per entry. Missing assets fail the check. Dynamic imports are excluded
 from this initial transfer budget. These deterministic byte limits are regression
 checks, not a claim about device response time or Core Web Vitals.
 
-Local build measured on 2026-10-21:
-
-| Entry | Initial JavaScript gzip | Initial CSS gzip |
-| --- | ---: | ---: |
-| Private rooms | 107,303 bytes | 8,562 bytes |
-| Courses and support | 136,919 bytes | 10,432 bytes |
-
-Re-run the command for the current build. The provider SDK bundled in the portal
-is included; service response times and device work are not measured here.
+Run the command to measure the current build. The provider SDK bundled in the
+portal is included; service response times and device work are not measured.
 
 The browser job starts only after the engine passes. Three bounded shards cover
 the complete configured browser matrix, each with one worker. Local development
-retains one worker because memory pressure has caused timeouts. Compare actual
-run duration and runner cost before increasing shards. No speed multiplier is
-claimed without data. [Playwright sharding](https://playwright.dev/docs/test-sharding)
+also uses one worker. [Playwright sharding](https://playwright.dev/docs/test-sharding)
 describes the mechanism.
 
 The package-manager content store is cached by lockfile. Build output,
 `node_modules`, credentials, test traces and user data are not cached or uploaded.
 Superseded runs are canceled. Jobs have explicit time limits. The stable final
-`ci` job requires every gate to succeed; configure it as required when the owner
-supplies the repository. There are no path filters that leave a required check
+`ci` job requires every gate to succeed. Repository maintainers can configure it
+as a required check. There are no path filters that leave a required check
 pending on documentation-only pull requests.
 
 `pnpm test:ci` sets the local PGlite module explicitly, so database authorization
@@ -57,7 +48,7 @@ pull-request workflow, self-hosted runner, automatic merge, publication or deplo
 command. The token receives repository contents read permission; checkout does
 not persist credentials. Actions use reviewed full commit IDs. Node and pnpm
 versions are explicit; dependency resolutions/integrity stay in the lockfile.
-Dependabot proposes bounded updates for human review after repository creation.
+Dependabot proposes bounded updates for human review.
 
 Do not give untrusted PR code deployment keys, production data or protected
 environment credentials. Pinning is not a guarantee of trustworthy code. Follow
@@ -68,21 +59,18 @@ actual repository; a YAML file cannot enable or prove these settings.
 
 ## Deployment boundary
 
-The owner reviews the local application before GitHub publication. After a
-hosting project is chosen, require a protected production environment and a
+Use a protected production environment and a
 least-privilege deployment identity. Provider configuration, schema changes and
 account/mail testing stay separate from untrusted PR jobs. Run
 `pnpm configure:portal` locally after setting public provider values, review
 the exact origin in `vercel.json`, and test the deployed response policy.
 
-For Vercel, stage an approved production build without assigning domains, test
+For Vercel, stage a production build without assigning domains, test
 it, then promote that same production deployment. Promoting a preview can rebuild
 with different environment values. See
 [Vercel's promotion guidance](https://vercel.com/docs/deployments/promoting-a-deployment).
 Database changes need their own tested recovery plan; reverting a frontend
 does not undo a schema change.
 
-No automatic deployment is configured until repository, project, approval
-settings and recovery are concrete. Private records, raw research and browser
-state do not belong in public artifacts or customer feeds. CI validates tested
-behavior for its commit; it is not security, legal or accessibility certification.
+No automatic deployment is configured. CI validates tested behavior for its
+commit; it is not security, legal or accessibility certification.

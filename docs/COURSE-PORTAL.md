@@ -1,12 +1,12 @@
 # Course portal and human support
 
-The optional learning library adds an original service around the private room: discover a course, enter with an institution account, read a small lesson, ask a specific question and receive human support. It does not upload the private room or turn its notes into an administrator dashboard. The default demonstration has simulated identities and original Physics/Music samples, with no email or password storage. Its changes disappear when the page reloads.
+The optional portal provides course browsing, institution accounts, lesson text and support messages. Private-room data is not uploaded or exposed to administrators. The default demonstration uses simulated identities and Physics/Music samples, with no email or password storage. Its changes disappear when the page reloads.
 
 ## Using the demonstration
 
 Open `/portal.html` in the local preview. Signed-out visitors see published course metadata, not lesson bodies or drafts. Choose **Preview learner** to read the original samples and submit a selected support message. Choose **Preview admin** to prepare a course draft, review its text and rights, publish it and reply to support. Return to the learner preview to read the reply. These switches are explicitly local demonstrations, not authentication or a reusable access-control implementation.
 
-Lessons use plain text with optional credited source links. The original samples offer Read → Try → Check → Plan, with no countdown, ranking, compulsory public profile or age inference. Standard/larger reading text is a preference for the current page. Changing text size does not change curriculum or imply an ability diagnosis. Practical effectiveness across ages still requires supervised learning/usability studies with representative participants.
+Lessons use plain text with optional credited source links. The samples offer Read → Try → Check → Plan. Standard/larger reading text is a preference for the current page; it does not change lesson content or assess ability. These controls do not establish learning effectiveness.
 
 Material creation and support forms preserve unsaved text after a failed save. Internal navigation and page refresh warn about unsaved edits. A form is disabled while its mutation is in flight. Course structure changes, including adding or removing lessons, also count as edits. A verified account identity, role or recovery change clears institutional working data; a same-account token refresh does not discard drafts. Password inputs are excluded from the private in-memory draft tracker; email and content field baselines retire when their forms unmount. No draft tracker writes to disk.
 
@@ -23,7 +23,7 @@ Material creation and support forms preserve unsaved text after a failed save. I
 
 A course carries a UUID identifier/revision, title, purpose, language, draft/published status and ordered materials. Each material has title, plain text, optional HTTP(S) source, creator credit and content rights. A support thread contains only the selected subject/message, optional course, owning learner ID, reply, status and revision. There is no private-room bundle, journal, encryption key, attached file, age or public roster in these records. Account email is shown only for the current account in this interface.
 
-Published courses require at least one material and explicit creator/rights statements. Publication checks establish that information is supplied, not that a claimed license is legally valid or an outside link is safe. The software's MIT license does not license third-party course content. The sample writing is original and separately labeled CC BY 4.0. No Adventist Discovery Centre courses, assets, branding or code are included.
+Published courses require at least one material and explicit creator/rights statements. Publication checks establish that information is supplied, not that a claimed license is legally valid or an outside link is safe. The software's MIT license does not license third-party course content. The sample writing is original and separately labeled CC BY 4.0.
 
 The current portal edits the latest course revision with compare-and-swap. It does **not** archive immutable published editions, enroll cohorts, track completion, grade answers, assign individual tutors or transfer private-room submissions automatically. The education adapter's versioned briefs and selected exchanges remain a separate feature. Limits are 100 courses/threads per response, 50 materials per course, 256 KiB per course, 20,000 characters per material and 5,000 per support message/reply. Larger deployments need authorized pagination and retention design.
 
@@ -112,12 +112,8 @@ node --experimental-strip-types --test tests/portal-schema.test.ts
 
 Without that variable, the database test is explicitly skipped. Its synthetic Auth functions exercise database grants, row policies and mutations; they do not verify Supabase JWT issuance, email confirmation, SMTP, HTTP gateway limits or an actual hosted project. Before release, repeat direct API tests with anonymous, two unrelated confirmed learners, a provisioned administrator, a revoked administrator and malformed/stale requests on the configured service. Test email expiry/reuse/tampering, sign-out/session handling, password recovery, error states and same-browser callbacks separately. Run database advisors and the deployment's own tests after adapting the schema.
 
-## Recovery, global use and remaining operator duties
+## Recovery and operator responsibilities
 
 Recovering an institution password restores that account only. It cannot decrypt a private room whose passphrase only its owner possesses. The UI states this separation before recovery. Users still need their private-room passphrase and encrypted backups.
 
-Institution support messages are personal data visible to authorized institutional staff; this is a different privacy boundary from device-encrypted notes. The operator must define access, retention, export/deletion, moderation, backups, incident response, staff authentication and child/institution enrollment arrangements before public use. No country-wide legal approval, all-age effectiveness, all-device compatibility or future-proof security certification follows from this implementation.
-
-Primary research informed the generic discover → learn → ask → receive support pattern. The [ADC public course catalogue](https://adventistdiscoverycentre.org/courses) and [partnership description](https://adventistdiscoverycentre.org/partnership) provide inspiration; no authenticated or administrator internals were observed. REA's public-page observations are private research evidence, not a copied implementation or a product dependency.
-
-Research checked 2026-10-21. Supabase's current [TLS notice](https://supabase.com/changelog/cbc-tls-ciphers-deprecated) schedules removal of outdated CBC TLS 1.2 suites from project HTTP APIs no earlier than 2026-11-10; unsupported older devices can lose access. Its [PostgreSQL minor-release notice](https://supabase.com/changelog/postgres-15-19-17-11-breaking-changes) was also reviewed; this example does not use the affected legacy PGP, ltree, float GiST or custom-operator patterns. Maintain supported clients and retest the actual deployment instead of promising every historical device.
+Institution support messages are personal data visible to authorized institutional staff; this is a different privacy boundary from device-encrypted notes. The operator must define access, retention, export/deletion, moderation, backups, incident response, staff authentication and enrollment arrangements before public use. Deployment-specific security, privacy and accessibility checks remain necessary.

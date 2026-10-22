@@ -34,7 +34,7 @@ blocked open rejects but later succeeds, the abandoned connection is closed.
 Invalid saved records reject without replacement. Clearing/eviction of browser
 storage remains possible: keep separate encrypted backups.
 
-## Research and decision — 16 October 2026
+## Transaction semantics
 
 The [W3C IndexedDB 3.0 working draft](https://www.w3.org/TR/IndexedDB/#transaction-lifecycle)
 distinguishes request success from transaction completion and describes atomic
@@ -42,10 +42,8 @@ commit/abort. Its [connection guidance](https://www.w3.org/TR/IndexedDB/#databas
 also covers version changes and blocked connections. We use those lifecycle rules
 for this bounded adapter; this is not a standards-conformance certification.
 
-The change removes application coupling without adding a database library,
-connection cache, cloud account or new storage format. Web application JS/CSS
-emitted filenames and Vite content hashes remain unchanged because its learning storage path is unchanged.
-No runtime-speed improvement is claimed from this extraction.
+The adapter uses native IndexedDB without a database library, connection cache
+or cloud account. It preserves the catalog storage format.
 
 ## Checks
 
@@ -57,6 +55,5 @@ The browser test serves only the built engine modules from an isolated localhost
 fixture and exercises real storage, encrypted reopening and simultaneous writers.
 It does not relax the web application's content security policy.
 
-Physical-device testing and full application flows from the previous milestone
-remain separate evidence. New adapter checks do not establish universal device
-support or legal approval.
+Adapter checks do not establish physical-device compatibility or verify every
+application flow. See [Testing](TESTING.md) for the configured browser suite.

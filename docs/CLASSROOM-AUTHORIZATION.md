@@ -7,7 +7,7 @@ explicit selected-file exchange. It does not call this policy or the abuse guard
 to establish school roles, sharing permissions or network protection. File
 recipient labels and imported feedback remain unverified.
 
-Why this exists: sharing selected work should not expose another learner's work, a different course, or personal journals. `packages/education/src/authorization.ts` provides one small, default-deny decision function for a future trusted server adapter. Imported files and the local demonstration cannot create identities, enrollments, or teacher privileges.
+`packages/education/src/authorization.ts` provides a default-deny decision function for trusted server adapters. Imported files and the local demonstration cannot create identities, enrollments, or teacher privileges.
 
 ## What the policy allows
 
@@ -40,9 +40,9 @@ The returned frozen snapshot includes only relevant IDs, role, action, and resou
 - Keep journal records outside classroom queries and permission joins. Shared work must come from a deliberate selected submission, never a whole-vault export or a student passphrase.
 - Establish institution-specific consent/lawful processing, child safeguarding, retention/deletion, accessibility, incident response, backup restoration and deployment-specific legal review.
 
-Unit tests cover the decision matrix, malformed claims, resource identity consistency, missing/revoked membership, disabled actors, suspended tenants, archived courses, and storage-facing download/export actions. These are reference-policy tests, not a live backend audit, independent penetration test, security certification, or legal approval. No fresh Codex Security scan is claimed.
+Unit tests cover the decision matrix, malformed claims, resource identity consistency, missing/revoked membership, disabled actors, suspended tenants, archived courses, and storage-facing download/export actions. These are reference-policy tests, not a live backend audit, independent penetration test, security certification, or legal approval.
 
-Next action: implement one trusted server adapter and test database isolation and private-file ownership before enabling any hosted classroom feature. Review this boundary whenever roles, routes, resource kinds, or storage providers change.
+A hosted integration must supply a trusted server adapter and verify database isolation and private-file ownership. Review this boundary whenever roles, routes, resource kinds, or storage providers change.
 
 ## Bounded abuse guard
 
@@ -54,6 +54,6 @@ The server must derive `actorKey` from a verified principal and measure/bound by
 
 This memory implementation is single-process and resets on restart. It is **not deployed bot protection or DDoS protection**. Multiple server instances require a shared atomic store with matching expiry, lease recovery, global-budget, and fail-closed behavior. Enforce operation deadlines/cancellation and bounded parsing/importing so hung work cannot hold permits forever. Use gateway body/rate/concurrency limits and the hosting provider's network protections before requests reach application workers. No CAPTCHA or live firewall setting is configured here.
 
-Hosted acceptance must demonstrate consistent limits under concurrent multi-instance requests, rejected request streams, identity/key churn, upstream authentication floods, store outages, worker crashes/expired leases, and deadline cancellation. Tests here cover burst/global budgets, concurrency, exception release, clock rollback, payload errors and bounded key churn only. No claim of predicting attacks years ahead or defeating every bot is made.
+Hosted acceptance must demonstrate consistent limits under concurrent multi-instance requests, rejected request streams, identity/key churn, upstream authentication floods, store outages, worker crashes/expired leases, and deadline cancellation. Tests here cover burst/global budgets, concurrency, exception release, clock rollback, payload errors and bounded key churn only.
 
 The design is informed by [OWASP ASVS 5.0.0, validation and business logic](https://github.com/OWASP/ASVS/blob/v5.0.0/5.0/en/0x11-V2-Validation-and-Business-Logic.md), including anti-automation controls for costly functions. This is a design reference; these fixtures do not verify every ASVS requirement or establish a verification level.

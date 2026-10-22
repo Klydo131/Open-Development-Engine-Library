@@ -47,7 +47,7 @@ A collection is a flat, ordered list of resource identifiers.
 Assets describe named bytes with media type, length and SHA-256.
 
 The catalog contains descriptors. A separate content map holds the actual bytes.
-This makes the metadata boundary explicit and allows future storage adapters
+This makes the metadata boundary explicit and lets storage adapters operate
 without embedding provider URLs, authentication identities or file blobs in
 every resource. The current portable bundle still contains all asset bytes;
 it is an in-memory snapshot, not a large-file streaming system.
@@ -190,9 +190,8 @@ network effect in the local web sample. A real service needs gateway limits,
 shared atomic budgets, deadlines, private storage and tested backend permissions.
 See [the server reference contract](CLASSROOM-AUTHORIZATION.md).
 
-## Growth boundary
+## Scope
 
 The first engine is a bounded single-user snapshot model. It deliberately has
 no circulation, multi-user permissions, public publication, federated identity
-or institutional metadata protocol implementation. Add those capabilities with
-their own threat model and evidence when a concrete library requires them.
+or institutional metadata protocol implementation.
