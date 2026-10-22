@@ -92,6 +92,8 @@ See [Education](docs/EDUCATION.md) and [Security](SECURITY.md).
 
 ## Documentation
 
+- [Changes and compatibility notes](CHANGELOG.md)
+- [Catalog search options and matching](docs/SEARCH.md)
 - [Architecture and package boundaries](docs/ARCHITECTURE.md)
 - [Data formats and migration](docs/FORMAT.md)
 - [IndexedDB adapter](docs/INDEXEDDB.md)

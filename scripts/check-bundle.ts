@@ -40,4 +40,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     requireBundleBudget(size);
     console.log(`${entry}: JavaScript ${size.javascript}/${INITIAL_BUDGET.javascript} bytes gzip; CSS ${size.css}/${INITIAL_BUDGET.css} bytes gzip.`);
   }
+  for (const file of ['LICENSE', 'THIRD_PARTY_NOTICES.md']) {
+    if (!readFileSync(resolve(directory, file)).equals(readFileSync(resolve(file)))) throw new Error(`Built license notice differs from source: ${file}.`);
+  }
+  console.log('Built license notices match their source files.');
 }

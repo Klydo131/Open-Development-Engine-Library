@@ -18,5 +18,10 @@ export default defineConfig(({mode})=>{
     for(const [name,value]of Object.entries(headers))res.setHeader(name,value);next();
   });};
   const headers:Plugin={name:'room-privacy-headers',configureServer:installHeaders,configurePreviewServer:installHeaders};
-  return {root,plugins:[headers],build:{target:'safari16',outDir:'dist',rollupOptions:{input:{rooms:fileURLToPath(new URL('./index.html',import.meta.url)),portal:fileURLToPath(new URL('./portal.html',import.meta.url))}}},server:{port:4178,strictPort:true},preview:{port:4178,strictPort:true}};
+  const notices:Plugin={name:'library-license-notices',generateBundle(){
+    for(const fileName of ['LICENSE','THIRD_PARTY_NOTICES.md']){
+      this.emitFile({type:'asset',fileName,source:readFileSync(new URL(`../../${fileName}`,import.meta.url))});
+    }
+  }};
+  return {root,plugins:[headers,notices],build:{target:'safari16',outDir:'dist',rollupOptions:{input:{rooms:fileURLToPath(new URL('./index.html',import.meta.url)),portal:fileURLToPath(new URL('./portal.html',import.meta.url))}}},server:{port:4178,strictPort:true},preview:{port:4178,strictPort:true}};
 });

@@ -50,3 +50,22 @@ device-support certification. See the repository's format and security docs.
 encrypted catalog with a fresh key/salt/IV and revision. It does not write storage.
 Commit against the previous revision and adopt its session only after success.
 Previously exported copies retain their original passphrases.
+
+## Local metadata search
+
+`searchCatalog(catalog, options)` validates its options at runtime, including
+for an empty catalog or an unknown collection. Optional `undefined` values mean
+absent; null, unknown keys, unsupported kinds and invalid identifiers reject.
+Raw string limits are 2,000 UTF-16 units for `query`, 200 for `subject` and 80
+for `language`; `collectionId` follows the catalog's 128-character ASCII ID rule.
+
+Matching uses NFKC normalization and lowercase without changing stored text.
+Every query token must occur in the title, description, creators, languages or
+subjects; subject and language filters match whole normalized values. Results
+sort by normalized title, then ID, and are detached snapshots. URLs, rights,
+asset bytes and extensions are not query fields. Returned resources still
+contain their metadata and extensions: search is neither redaction nor access
+control. See the repository's [search contract](../../docs/SEARCH.md).
+
+Alpha compatibility correction: misspelled JavaScript options now throw instead
+of silently broadening a search or returning a misleading empty result.
