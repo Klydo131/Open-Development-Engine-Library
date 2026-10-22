@@ -6,7 +6,7 @@ export type Course = Readonly<{id: string; revision: string; title: string; summ
 export type SupportThread = Readonly<{id: string; learnerId: string; courseId?: string; subject: string; message: string; reply: string; status: 'open' | 'answered'; revision: string}>;
 export type SupportQuestion = Readonly<{courseId?: string; subject: string; message: string}>;
 export interface CoursePortal {
-  readonly kind: 'demo' | 'supabase';
+  readonly kind: string;
   account(): Promise<PortalAccount>;
   onAccountChange(listener: () => void): () => void;
   signUp(email: string, password: string): Promise<void>;

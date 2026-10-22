@@ -37,7 +37,9 @@ describes the mechanism.
 
 The package-manager content store is cached by lockfile. Build output,
 `node_modules`, credentials, test traces and user data are not cached or uploaded.
-Superseded runs are canceled. Jobs have explicit time limits. The stable final
+Main-branch pushes and pull requests run the full checks. Feature-branch pushes
+are checked through their pull request, avoiding a duplicate push run. Manual
+runs remain available. Superseded runs are canceled. Jobs have explicit time limits. The stable final
 `ci` job requires every gate to succeed. Repository maintainers can configure it
 as a required check. There are no path filters that leave a required check
 pending on documentation-only pull requests.

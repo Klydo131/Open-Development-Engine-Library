@@ -2,8 +2,9 @@ import {useEffect,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {createClient} from '@supabase/supabase-js';
 import {supabaseCoursePortal} from '../../../examples/supabase/course-portal.ts';
+import {boundedJsonFetch} from '../../../examples/http/bounded-fetch.ts';
 import {portalConfig} from '../portal-config.ts';
-import {portalSourceUrl,type CoursePortal} from '../../../packages/portal/src/index.ts';
+import {PORTAL_LIMITS,portalSourceUrl,type CoursePortal} from '../../../packages/portal/src/index.ts';
 import {createDemoPortal} from './portal-demo.ts';
 import {PortalPanel} from './PortalPanel.tsx';
 import {createPortalStorage,PORTAL_STORAGE_KEY} from './portal-storage.ts';
@@ -13,7 +14,7 @@ async function makePortal():Promise<CoursePortal>{
   const config=portalConfig(import.meta.env.VITE_PORTAL_SUPABASE_URL,import.meta.env.VITE_PORTAL_SUPABASE_PUBLISHABLE_KEY);
   if(!config)return createDemoPortal();
   const storage=createPortalStorage(window.localStorage);
-  const client=createClient(config.url,config.key,{auth:{storageKey:PORTAL_STORAGE_KEY,storage,persistSession:true,flowType:'pkce',detectSessionInUrl:true,experimental:{appendPkceFlowIdToRedirects:true}}});
+  const client=createClient(config.url,config.key,{global:{fetch:boundedJsonFetch({maxResponseBytes:PORTAL_LIMITS.responseBytes,timeoutMs:30000})},auth:{storageKey:PORTAL_STORAGE_KEY,storage,persistSession:true,flowType:'pkce',detectSessionInUrl:true,experimental:{appendPkceFlowIdToRedirects:true}}});
   const portal=supabaseCoursePortal(client,{redirectTo:new URL('/portal.html',window.location.origin).href});
   // Await the SDK's verified callback exchange before its PASSWORD_RECOVERY state is read.
   const callback=Boolean(new URLSearchParams(window.location.search).get('code')||window.location.hash);

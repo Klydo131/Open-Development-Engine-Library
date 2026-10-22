@@ -34,7 +34,8 @@ writeFileSync(join(consumer,'check.ts'),`import {createCatalog,type Catalog} fro
 import {emptyEducation,type EducationState} from '@open-learning-rooms/education';
 import {validateCourse,type CoursePortal} from '@open-learning-rooms/portal';
 const catalog:Catalog=createCatalog();const education:EducationState=emptyEducation();
-let provider:CoursePortal|null=null;void [catalog,education,provider,validateCourse];`);
+const providerKind:CoursePortal['kind']='custom-json-provider';
+let provider:CoursePortal|null=null;void [catalog,education,provider,providerKind,validateCourse];`);
 writeFileSync(join(consumer,'tsconfig.json'),JSON.stringify({compilerOptions:{noEmit:true,strict:true,skipLibCheck:true,target:'ES2022',module:'NodeNext',moduleResolution:'NodeNext',types:[]},include:['check.ts']}));
 execFileSync(process.execPath,[join(root,'node_modules/typescript/bin/tsc'),'-p',join(consumer,'tsconfig.json')],{cwd:consumer,stdio:'inherit'});
 console.log('External TypeScript consumer passed. Package artifacts stay in the local lab.');
