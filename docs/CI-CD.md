@@ -45,7 +45,8 @@ as a required check. There are no path filters that leave a required check
 pending on documentation-only pull requests.
 
 `pnpm test:ci` sets the local PGlite module explicitly, so database authorization
-tests cannot silently skip. `pnpm test:packages` checks offline tarball imports
+tests cannot silently skip. It runs at most two test files concurrently to bound
+memory use while several PostgreSQL fixtures initialize. `pnpm test:packages` checks offline tarball imports
 and an external TypeScript consumer, including the optional IndexedDB entry.
 Neither command publishes packages.
 

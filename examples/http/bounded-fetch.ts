@@ -30,12 +30,15 @@ export function boundedJsonFetch(options: {maxResponseBytes: number; timeoutMs: 
     const onAbort = () => stop('aborted');
     caller?.addEventListener('abort', onAbort, {once: true});
     const timer = setTimeout(() => stop('timeout'), timeoutMs);
+    const deadline = performance.now() + timeoutMs;
     let phase: 'network' | 'response' = 'network';
     try {
       const pending = Promise.resolve().then(() => {
+        if (performance.now() >= deadline) stop('timeout');
         if (failure) throw failure;
         return upstream(input, {...init, signal: controller.signal});
       }).then(response => {
+        if (performance.now() >= deadline) stop('timeout');
         if (failure) {
           // A fetch implementation may ignore abort and return a body after this request has settled.
           try { void response.body?.cancel(failure).catch(() => {}); } catch { /* no usable body */ }
@@ -50,8 +53,11 @@ export function boundedJsonFetch(options: {maxResponseBytes: number; timeoutMs: 
       const read = async () => {
         let data = new Uint8Array(0), length = 0;
         while (true) {
+          // Immediately resolved empty chunks can starve the timer queue.
+          if (performance.now() >= deadline) throw new BoundedFetchError('timeout');
           const chunk = await reader!.read();
           if (failure) throw failure;
+          if (performance.now() >= deadline) throw new BoundedFetchError('timeout');
           if (chunk.done) break;
           if (!(chunk.value instanceof Uint8Array)) throw new BoundedFetchError('response');
           if (chunk.value.byteLength > maxResponseBytes - length) throw new BoundedFetchError('response-size');

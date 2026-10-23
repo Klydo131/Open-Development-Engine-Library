@@ -1,7 +1,8 @@
+import {supabaseGroupWorkspace, type GroupDelivery} from './group-workspace.ts';
 import {
   PortalConflict, portalEmail, portalId, portalPassword, validateCourse, validateCourseList,
   validateSupportList, validateSupportQuestion, validateSupportReply,
-  type CoursePortal, type PortalAccount,
+  type CoursePortal, type PortalAccount, type PortalMediaStore,
 } from '../../packages/portal/src/index.ts';
 
 type Result = {data?: unknown; error: unknown};
@@ -31,7 +32,7 @@ function code(error: unknown): string | undefined {
   return error && typeof error === 'object' && 'code' in error && typeof error.code === 'string' ? error.code : undefined;
 }
 /** Original optional adapter. Auth/account data never enters the private vault. */
-export function supabaseCoursePortal(client: SupabasePortalClient, options: {redirectTo: string}): CoursePortal & {dispose(): void} {
+export function supabaseCoursePortal(client: SupabasePortalClient, options: {redirectTo: string; groupDelivery?:GroupDelivery; media?:PortalMediaStore}): CoursePortal & {dispose(): void} {
   const redirectTo = redirect(options.redirectTo);
   const listeners = new Set<() => void>();
   let recovery = false;
@@ -65,7 +66,7 @@ export function supabaseCoursePortal(client: SupabasePortalClient, options: {red
   }
   async function checkedAuth(result: PromiseLike<Result>, message: string) { if ((await result).error) throw new Error(message); }
   return {
-    kind: 'supabase', account,
+    kind: 'supabase', account, groups:supabaseGroupWorkspace(client,options.groupDelivery), media:options.media,
     onAccountChange(listener) { listeners.add(listener); return () => {listeners.delete(listener);}; },
     async signUp(email, password) {
       await checkedAuth(client.auth.signUp({email: portalEmail(email), password: portalPassword(password), options: {emailRedirectTo: redirectTo}}), 'The account request could not be completed. Try again later.');
@@ -96,7 +97,7 @@ export function supabaseCoursePortal(client: SupabasePortalClient, options: {red
     async saveCourse(course, expectedRevision) {
       const checked = validateCourse(course);
       if (checked.status === 'published' && !checked.lessons.length) throw new Error('Add learning material before publishing.');
-      if (checked.status === 'published' && checked.lessons.some(lesson => (!lesson.text.trim() && !lesson.sourceUrl) || !lesson.credit.trim() || !lesson.rights.trim())) throw new Error('Published materials need content, source credit and a rights statement.');
+      if (checked.status === 'published' && checked.lessons.some(lesson => (!lesson.text.trim() && !lesson.sourceUrl && !lesson.attachment) || !lesson.credit.trim() || !lesson.rights.trim())) throw new Error('Published materials need content, source credit and a rights statement.');
       return validateCourse(await rpc('portal_save_course', {p_course: checked, p_expected_revision: expectedRevision === null ? null : portalId(expectedRevision)}));
     },
     async getSupport() { return validateSupportList(await rpc('portal_support')); },

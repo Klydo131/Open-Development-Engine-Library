@@ -32,13 +32,14 @@ test('course portal PostgreSQL row policies and transactional mutations', {skip:
   }
   await db.exec(`
     create role anon nologin noinherit; create role authenticated nologin noinherit;
-    create schema auth; create table auth.users(id uuid primary key);
+    create schema auth; create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
     create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;
     grant usage on schema auth to anon,authenticated;
     grant execute on function auth.uid(),auth.jwt() to anon,authenticated;
-    insert into auth.users(id) values ('${owner}'),('${learner}'),('${other}');
+    insert into auth.users(id,email,email_confirmed_at) values ('${owner}','admin@example.org',now()),('${learner}','learner@example.org',now()),('${other}','other@example.org',now());
   `);
+  await db.exec(await readFile(new URL('../examples/postgres/course-portal-schema.sql', import.meta.url),'utf8'));
   await db.exec(await readFile(new URL('../examples/supabase/course-portal-schema.sql', import.meta.url),'utf8'));
   await db.query('insert into portal_private.administrators(user_id) values ($1)',[owner]);
   let published: any;

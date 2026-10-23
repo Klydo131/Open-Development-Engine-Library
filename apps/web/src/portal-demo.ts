@@ -1,9 +1,12 @@
 import {portalId, validateCourse, validateSupportQuestion, validateSupportReply, type Course, type CoursePortal, type Material, type PortalAccount, type SupportThread} from '../../../packages/portal/src/index.ts';
+import {createDemoGroups} from './portal-demo-groups.ts';
+import {createDemoMedia} from './portal-media-demo.ts';
 
 export interface DemoCoursePortal extends CoursePortal {
   readonly kind: 'demo';
   /** A visible local preview only. Never use this method as authentication. */
   setDemoRole(role: 'learner'|'admin'|null): void;
+  previewInvitation(id:string):Readonly<{email:string;token:string}>;
 }
 
 const original = 'Original Open Learning Rooms sample; CC BY 4.0.';
@@ -30,18 +33,24 @@ export function createDemoPortal(options:{learnerId?:string}={}):DemoCoursePorta
   const requireUser=()=>{if(!current.user)throw new Error('Choose a demo learner or admin preview first.');return current.user;};
   const requireAdmin=()=>{const user=requireUser();if(user.role!=='admin')throw new Error('Only an assigned admin can manage materials.');return user;};
   const noEmail=async()=>{throw new Error('Email accounts are not configured in this local demo. Choose a preview instead.');};
+  const groups=createDemoGroups(requireUser,{learnerId,adminId});
+  const media=createDemoMedia(()=>current,async id=>current.user?.role==='admin'||((await groups.workspace.listGroups()).length>0&&courses.some(course=>course.status==='published'&&course.lessons.some(lesson=>lesson.attachment?.id===id))));
   return {
     kind:'demo',
+    groups:groups.workspace,
+    media,
+    previewInvitation:groups.previewInvitation,
     async account(){return snapshot(current);},
     onAccountChange(listener){listeners.add(listener);return()=>{listeners.delete(listener);};},
     setDemoRole(role){if(role!==null&&role!=='learner'&&role!=='admin')throw new Error('Choose an available demo preview.');current={user:role?{id:role==='admin'?adminId:learnerId,email:role==='admin'?'admin@example.invalid':'learner@example.invalid',role}:null,recovery:false};for(const listener of listeners)listener();},
     signUp:noEmail,signIn:noEmail,requestPasswordReset:noEmail,updatePassword:noEmail,
     async signOut(){this.setDemoRole(null);},
-    async listCourses(){return snapshot(courses.filter(course=>course.status==='published'||current.user?.role==='admin').map(course=>current.user?course:{...course,lessons:[]}));},
+    async listCourses(){const member=Boolean(current.user&&(current.user.role==='admin'||(await groups.workspace.listGroups()).length));return snapshot(courses.filter(course=>course.status==='published'||current.user?.role==='admin').map(course=>member?course:{...course,lessons:[]}));},
     async saveCourse(input,expectedRevision){
       requireAdmin();
       const checked=validateCourse(input);
-      if(checked.status==='published'&&(!checked.lessons.length||checked.lessons.some(lesson=>(!lesson.text.trim()&&!lesson.sourceUrl)||!lesson.credit.trim()||!lesson.rights.trim())))throw new Error('Add lesson text or a source link, creator credit and content rights before publishing.');
+      if(checked.lessons.some(lesson=>lesson.attachment&&!media.has(lesson.attachment)))throw new Error('Upload the library file before attaching it to a lesson.');
+      if(checked.status==='published'&&(!checked.lessons.length||checked.lessons.some(lesson=>(!lesson.text.trim()&&!lesson.sourceUrl&&!lesson.attachment)||!lesson.credit.trim()||!lesson.rights.trim())))throw new Error('Add lesson text, an attachment or a source link, creator credit and content rights before publishing.');
       const existing=courses.find(course=>course.id===checked.id);
       if(existing?existing.revision!==expectedRevision:expectedRevision!==null)throw new Error('This course changed elsewhere. Reopen it before saving. Your edits are still here.');
       if(!existing&&courses.length>=100)throw new Error('This demo supports up to 100 courses.');

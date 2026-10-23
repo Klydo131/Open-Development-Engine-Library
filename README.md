@@ -23,12 +23,16 @@ unchanged for compatibility.
 - An optional education package for versioned briefs, private attempt revisions,
   selected-text exchange and feedback.
 - A responsive reference application with guided study, reading controls and locking.
-- A separate course/support portal with a temporary local demonstration and an
-  optional Supabase email-account and database-policy example.
+- A separate course portal with Learner/Admin guides, support, invited study
+  groups, discussions, scheduled sessions and private teacher rooms.
+- PostgreSQL schema and server adapters, optional Supabase email accounts, and
+  configurable email-invitation and scanned-file services.
 
-The catalog uses a bounded, single-user snapshot model. The course portal's
-authorization applies to its own records; it does not grant access to private
-vaults. See [Architecture](docs/ARCHITECTURE.md) for the component boundaries.
+The catalog uses a bounded, single-user snapshot model. The course portal uses
+a separate shared-service model. Its PostgreSQL examples require trusted identity
+integration; configuring the browser alone does not deploy account, email or file
+services. Portal authorization does not grant access to private vaults. See
+[Architecture](docs/ARCHITECTURE.md) for the component boundaries.
 
 ## Run locally
 
@@ -41,9 +45,10 @@ pnpm dev
 
 Open the address printed by Vite, normally
 [http://127.0.0.1:4178](http://127.0.0.1:4178). The course/support demonstration is
-available at `/portal.html`; its preview changes disappear on refresh and no email
-is sent. Configuring a provider requires the separate
-[portal setup](docs/COURSE-PORTAL.md).
+available at `/portal.html`. Choose **Preview learner** or **Preview admin**, then
+open **Getting started** for the role's guide. Courses, groups, messages and
+uploaded files in this demonstration disappear on refresh; no email is sent.
+Configuring a service requires the separate [portal setup](docs/COURSE-PORTAL.md).
 
 ```sh
 pnpm build
@@ -105,6 +110,8 @@ See [Education](docs/EDUCATION.md) and [Security](SECURITY.md).
 - [Guided study](docs/AGE-INCLUSIVE-STUDY.md)
 - [Classroom authorization and abuse-control references](docs/CLASSROOM-AUTHORIZATION.md)
 - [Course and support portal](docs/COURSE-PORTAL.md)
+- [PostgreSQL setup and identity boundaries](docs/POSTGRESQL.md)
+- [Groups, invitations and mixed media](docs/GROUPS-AND-MEDIA.md)
 - [Bounded provider transport](docs/HTTP-TRANSPORT.md)
 - [Hosting examples](docs/HOSTING.md)
 - [CI and deployment boundaries](docs/CI-CD.md)

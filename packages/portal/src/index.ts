@@ -1,12 +1,18 @@
 /** Optional hosted course catalog. Never contains a learner's encrypted private room. */
 export type PortalUser = Readonly<{id: string; email: string; role: 'learner' | 'admin'}>;
 export type PortalAccount = Readonly<{user: PortalUser | null; recovery: boolean}>;
-export type Material = Readonly<{id: string; title: string; text: string; sourceUrl: string; credit: string; rights: string}>;
+import type {GroupWorkspace} from './groups.ts';
+import {validatePortalMedia,type PortalMedia,type PortalMediaStore} from './media.ts';
+export * from './groups.ts';
+export * from './media.ts';
+export type Material = Readonly<{id: string; title: string; text: string; sourceUrl: string; credit: string; rights: string; mediaType?: 'text'|'document'|'audio'|'video'|'link'|'image'; attachment?:PortalMedia}>;
 export type Course = Readonly<{id: string; revision: string; title: string; summary: string; language: string; status: 'draft' | 'published'; lessons: readonly Material[]}>;
 export type SupportThread = Readonly<{id: string; learnerId: string; courseId?: string; subject: string; message: string; reply: string; status: 'open' | 'answered'; revision: string}>;
 export type SupportQuestion = Readonly<{courseId?: string; subject: string; message: string}>;
 export interface CoursePortal {
   readonly kind: string;
+  readonly groups?: GroupWorkspace;
+  readonly media?: PortalMediaStore;
   account(): Promise<PortalAccount>;
   onAccountChange(listener: () => void): () => void;
   signUp(email: string, password: string): Promise<void>;
@@ -68,9 +74,10 @@ export function validateCourse(value: unknown): Course {
   if (!/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/u.test(language) || /[\r\n]/u.test(language)) return fail();
   const ids = new Set<string>();
   const lessons = row.lessons.map(item => {
-    const material = object(item, ['id', 'title', 'text', 'sourceUrl', 'credit', 'rights']);
+    const material = object(item, ['id', 'title', 'text', 'sourceUrl', 'credit', 'rights'], ['mediaType','attachment']);
+    if ('mediaType' in material && !['text','document','audio','video','link','image'].includes(material.mediaType as string)) return fail();
     const id = portalId(material.id); if (ids.has(id)) return fail(); ids.add(id);
-    return Object.freeze({id, title: text(material.title, 160, true), text: text(material.text, PORTAL_LIMITS.materialText), sourceUrl: portalSourceUrl(material.sourceUrl), credit: text(material.credit, 500), rights: text(material.rights, 500)});
+    return Object.freeze({id, title: text(material.title, 160, true), text: text(material.text, PORTAL_LIMITS.materialText), sourceUrl: portalSourceUrl(material.sourceUrl), credit: text(material.credit, 500), rights: text(material.rights, 500), ...('mediaType' in material ? {mediaType: material.mediaType as Material['mediaType']} : {}), ...('attachment' in material ? {attachment:validatePortalMedia(material.attachment)} : {})});
   });
   const course: Course = Object.freeze({id: portalId(row.id), revision: portalId(row.revision), title: text(row.title, 160, true), summary: text(row.summary, 2000, true), language, status: row.status as Course['status'], lessons: Object.freeze(lessons)});
   bytes(course, PORTAL_LIMITS.courseBytes); return course;
