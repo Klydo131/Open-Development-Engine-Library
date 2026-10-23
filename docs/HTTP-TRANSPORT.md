@@ -20,7 +20,7 @@ const value: unknown = await response.json();
 
 `maxResponseBytes` must be a positive safe integer. `timeoutMs` must be an integer from 1 to 2,147,483,647. Invalid configuration throws `TypeError` before requests start. Supply an optional `fetch: typeof fetch` implementation for a trusted provider adapter or isolated tests; otherwise the adapter uses native Fetch.
 
-The configured web portal injects this adapter through Supabase's [`global.fetch` option](https://supabase.com/docs/reference/javascript/initializing#custom-fetch-implementation), with the portal's 4 MiB response limit and a 30-second deadline per fetch attempt. The local demonstration does not contact a provider.
+The configured web portal injects this adapter through Supabase's [`global.fetch` option](https://supabase.com/docs/reference/javascript/initializing#custom-fetch-implementation), with a 4 MiB response limit for JSON exchanges. Only GET requests to the configured provider origin's exact `/functions/v1/library-media` path use a separate 10 MiB ceiling. Both use a 30-second deadline per fetch attempt. The local demonstration does not contact a provider.
 
 ## Response handling
 
@@ -28,7 +28,7 @@ The adapter reads actual decoded response bytes through a native stream reader. 
 
 After a successful read, the adapter returns a new `Response` with the original status, status text and headers. HTTP errors such as 429 and 503 remain responses; `Retry-After` and their bodies remain available to the consumer. Invalid JSON remains a consumer parsing error. Responses without a body, including normal HEAD and 204 responses, remain bodyless.
 
-This is an adapter for bounded Auth/RPC JSON exchanges, not a transparent replacement for arbitrary Fetch use. Reconstructed responses do not preserve the original `url`, `type` or `redirected` metadata. Original headers can describe the wire representation even though Fetch has already decoded its body. Do not forward the reconstructed response as an HTTP representation without applying appropriate headers. File downloads, streaming media, server-sent events and opaque cross-origin responses need a different transport.
+This is an adapter for bounded Auth/RPC exchanges and small, fully buffered file responses, not a transparent replacement for arbitrary Fetch use. Reconstructed responses do not preserve the original `url`, `type` or `redirected` metadata. Original headers can describe the wire representation even though Fetch has already decoded its body. Do not forward the reconstructed response as an HTTP representation without applying appropriate headers. Large downloads, streaming media, server-sent events and opaque cross-origin responses need a different transport.
 
 Schema validation still belongs at the provider boundary after JSON parsing. A bounded byte sequence can contain invalid records. Authentication, authorization, revision checks and request-body limits remain the responsibility of the service and its adapter.
 

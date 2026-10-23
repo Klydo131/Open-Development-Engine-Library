@@ -8,7 +8,7 @@ own interface and tools without adopting the sample's lesson or practice model.
 
 | Area | Responsibility |
 | --- | --- |
-| `packages/core/src/catalog.ts` | Catalog types, validation, mutations, collections, search and portable bundles |
+| `packages/core/src/catalog.ts`, `dcmi.ts` | Catalog validation, mutations, collections, local metadata search, portable bundles and selected DCMI JSON fields |
 | `packages/core/src/catalog-vault.ts` | Versioned authenticated encryption for catalog bundles |
 | `packages/core/src/catalog-rekey.ts` | Pure preparation of a passphrase change; caller commits conditionally |
 | `packages/core/src/catalog-store.ts` | Revision-aware ciphertext storage contract and memory reference store |
@@ -19,24 +19,35 @@ own interface and tools without adopting the sample's lesson or practice model.
 | `apps/web/src/education-store.ts` | Preserve the education namespace within encrypted catalog saves |
 | `apps/web/src/education-exchange.ts` | Selected-text file encryption/decryption using an independent passphrase |
 | `apps/web` | Example interface, legacy browser persistence and learning workflow |
-| `packages/portal/src/index.ts` | Provider-neutral course/support contract and bounded runtime validators |
-| `apps/web/portal.html`, `src/PortalPanel.tsx` | Separate course/support entry, memory-only demonstration or configured provider |
-| `examples/supabase/course-portal.ts`, `course-portal-schema.sql` | Optional email Auth adapter and server-enforced course/support permissions |
-| `examples/supabase` | Optional reference adapter for the original learning-vault contract |
+| `packages/portal/src/index.ts`, `groups.ts`, `media.ts` | Provider-neutral account, course, support, group and media contracts with bounded runtime validators |
+| `apps/web/portal.html`, `src/PortalPanel.tsx`, `GroupPanel.tsx`, `PortalTutorial.tsx` | Separate library entry: Learner/Admin tools, groups, teacher requests and optional role tutorials |
+| `apps/web/src/portal-demo.ts`, `portal-demo-groups.ts`, `portal-media-demo.ts` | Memory-only course, support, group, invitation and mixed-media demonstration |
+| `examples/postgres/course-portal-schema.sql` | Primary PostgreSQL account, admin, course and support schema; independent of an identity provider |
+| `examples/postgres/group-workspace-schema.sql`, `group-workspace.ts`, `portal-rpc.ts` | Group membership, discussions, sessions, invitations, private teacher rooms and trusted-server RPC ports |
+| `examples/postgres/media-schema.sql`, `media-store.ts` | Private media bytes, metadata/integrity checks and a dedicated server-only storage port |
+| `examples/http/group-invitations.ts`, `library-media.ts`, `portal-services.ts` | Fetch handlers and client service adapters; injected verified authentication, email delivery and upload scanner |
+| `examples/http/bounded-fetch.ts` | Response-size and elapsed-time bounds for provider transport |
+| `examples/supabase/course-portal.ts`, `group-workspace.ts` | Optional email Auth/SDK course and group adapters |
+| `examples/supabase/course-portal-schema.sql` | Optional Auth-to-account bridge installed after the portable PostgreSQL core schema |
+| `examples/supabase/store.ts`, `schema.example.sql` | Optional reference adapter for the original learning-vault contract |
 | `tests` | Core and browser verification with synthetic data |
 
 The core uses platform capabilities such as Web Crypto, typed arrays and text
 encoding. It has no React, database client, hosted service, analytics or network
 dependency. The sample imports local source during development. The repository
-also builds the core and optional education package to their own `dist`
-directories; no registry publication is implied. The portal contract also builds
-independently and has no runtime dependency. Supabase's SDK belongs only to the
-optional portal application entry; the private room keeps `connect-src 'none'`.
+builds three independent packages at `packages/core/dist`,
+`packages/education/dist` and `packages/portal/dist`. Their main entry points
+export `dist/index.js` and matching declarations; the core also exposes the
+optional `./indexeddb` entry. All three packages have no runtime dependencies.
+Packed-package tests exercise an isolated consumer; this does not publish them
+to a registry. Supabase's SDK belongs only to the optional portal application
+entry; the private room keeps `connect-src 'none'`.
 
 The guided study view reuses existing education attempts and encrypted saves;
 its stage/readability choices do not change the storage format. Institution
 accounts and recovery never unlock a private vault. Course materials and selected
-support messages are separate hosted data when a provider is configured. See the
+support messages, group discussions and uploaded course files are separate
+service data when a provider is configured. See the
 [portal guide](COURSE-PORTAL.md) and [study guide](AGE-INCLUSIVE-STUDY.md).
 
 ## Catalog and content
@@ -192,6 +203,79 @@ See [the server reference contract](CLASSROOM-AUTHORIZATION.md).
 
 ## Scope
 
-The first engine is a bounded single-user snapshot model. It deliberately has
-no circulation, multi-user permissions, public publication, federated identity
-or institutional metadata protocol implementation.
+The core remains a bounded single-user snapshot engine. The optional portal
+adds shared service permissions in its PostgreSQL reference implementation;
+these do not alter the personal vault's encryption or storage model. Neither
+package implements circulation, a public publishing platform, federated
+identity or an institutional metadata exchange protocol. Selected DCMI JSON
+metadata is a descriptive export, not an RDF or catalog federation service.
+
+## Library service boundary
+
+PostgreSQL 15+ is the primary service database. Install the portable core schema,
+then the group schema, then the media schema if uploads are offered. The
+Supabase schema is an optional identity bridge, not a replacement for the core.
+The generic server adapter requires a pool connection port and a verified actor;
+it starts a transaction, assumes the restricted `authenticated` role and sets
+`library.actor_id` only for that transaction. The operator must authenticate the
+request and synchronize authoritative account/verification state first. Raw SQL,
+database credentials and the actor-context setter must never be exposed to a
+browser client. With the Supabase bridge installed, identity comes from
+`auth.uid()` and anonymous JWTs are rejected instead of trusting that context.
+
+Accounts and content roles are separate. Signup cannot grant admin access.
+Guests can see published course summaries. With the group schema installed,
+learners require library membership to read published lesson content; admins can
+curate drafts. Membership in any group grants access to the same shared
+published catalog. Groups are not separate institutional tenants or per-course
+entitlements.
+
+Regular group discussions and sessions are visible to group members and library
+admins. Learners can request a teacher, but only an admin can create the resulting
+private room. The creating admin becomes its assigned teacher; other admins
+cannot read that room through the provided permission functions. Shared rooms
+and support messages are service data, not end-to-end encrypted personal vault
+content. Removing membership blocks future authorized requests, not copies
+already received. Referenced facilitator accounts require an operator-managed
+transfer or closure process before deletion.
+
+Invitations bind a hashed random token to an email address and group. Joining
+requires a verified account with that email and explicit acceptance before the
+token expires. Opening a link does not accept it. The invitation Fetch handler
+injects an email service and verified staff authentication; it does not send mail
+without those integrations. Scheduled sessions represent discussion times and
+do not establish audio/video calls.
+
+Links and uploaded files remain distinct. Admins can record credited HTTP(S)
+sources or attach supported files. Hosted uploads require an injected malware
+scanner that returns `clean` before storage; a missing or unavailable scanner
+rejects the upload. Byte-signature and SHA-256 checks validate format/integrity,
+not malware safety. The media database role has access only to its private store
+functions. Learner downloads require membership and an exact attachment in a
+published course; files are returned as downloads rather than embedded code.
+The reference capacity is 10 MiB per file, 100 files and 100 MiB aggregate upload
+storage. This is a bounded byte store, not a streaming or transcoding service.
+
+The default web portal uses temporary in-memory implementations. Refresh clears
+its accounts, edits, files, discussions and simulated invitations; it sends no
+email and stores no account passwords. Role tutorials only explain the available
+workflows and do not persist training results or mutate records. A connected
+service requires real identity, email, scanner, database and hosting
+configuration. Body/response deadlines do not replace operator limits for
+authentication, pool/query work, mail delivery or the gateway.
+
+## Adapter and delivery boundary
+
+Applications can supply a `CatalogStore`, `CoursePortal`, `GroupWorkspace` or
+`PortalMediaStore`, and servers can implement the narrow pool/query,
+authentication, scanner and mailer ports. Catalog extensions are bounded data;
+there is no arbitrary plugin code loader or sandbox. Keep provider code outside
+the three dependency-free packages.
+
+The CI workflow checks lint, types, SQL permission behavior, builds, bundle
+budgets, dependency advisories, isolated package consumers and browser journeys.
+Pinned action commits, read-only workflow permissions and a frozen install
+reduce unnecessary supply-chain access. Browser checks run in three shards with
+one worker each; unit/SQL test files use bounded concurrency. The workflow has no
+deployment job. Passing these checks does not establish physical-device coverage,
+live email/scanner operation or completion of an independent security review.

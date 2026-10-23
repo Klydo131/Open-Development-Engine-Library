@@ -127,6 +127,15 @@ test('HEAD and null-body 204 responses remain bodyless', async () => {
   }
 });
 
+test('immediately resolved empty chunks cannot starve the total deadline', {timeout: 3000}, async () => {
+  let canceled = false;
+  const fetcher = transport(async () => new Response(new ReadableStream<Uint8Array>({
+    pull(controller) { controller.enqueue(new Uint8Array(0)); }, cancel() { canceled = true; },
+  })), 16, 25);
+  await assert.rejects(fetcher('https://provider.example'), expected('timeout'));
+  assert.equal(canceled, true);
+});
+
 test('request method, selected headers, body and fetch policies reach the injected adapter', async () => {
   let actual: RequestInit | undefined;
   const fetcher = transport(async (_input, init) => { actual = init; return new Response('{}'); });
