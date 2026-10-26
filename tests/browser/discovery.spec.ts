@@ -13,10 +13,10 @@ async function start(page: Page) {
   await expect(explore(page, 'Find a steady pulse')).toBeVisible();
 }
 
-async function tabTo(page: Page, target: Locator) {
+async function tabTo(page: Page, target: Locator, key: 'Tab' | 'Shift+Tab' = 'Tab') {
   for (let step = 0; step < 40; step++) {
     if (await target.evaluate(element => element === document.activeElement)) return;
-    await page.keyboard.press('Tab');
+    await page.keyboard.press(key);
   }
   await expect(target, 'The control is reachable with the keyboard').toBeFocused();
 }
@@ -176,7 +176,7 @@ test('discovery reflows at 320 pixels and its search, course and personal room r
   await tabTo(page, explore(page, 'Find a steady pulse'));
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', {name: 'Find a steady pulse', exact: true})).toBeVisible();
-  await tabTo(page, page.getByRole('button', {name: 'Private rooms', exact: true}));
+  await tabTo(page, page.getByRole('button', {name: 'Private rooms', exact: true}), 'Shift+Tab');
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('button', {name: 'Create your room', exact: true})).toBeVisible();
