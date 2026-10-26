@@ -2,7 +2,10 @@ import {defineConfig,devices} from '@playwright/test';
 export default defineConfig({
   testDir:'./tests/browser',timeout:45000,expect:{timeout:15000},fullyParallel:true,workers:1,
   reporter:[['list']],use:{baseURL:'http://127.0.0.1:4178',trace:'retain-on-failure'},
-  webServer:{command:'pnpm preview',url:'http://127.0.0.1:4178',reuseExistingServer:!process.env.CI,timeout:45000},
+  webServer:[
+    {command:'pnpm preview',url:'http://127.0.0.1:4178',reuseExistingServer:!process.env.CI,timeout:45000},
+    {command:'node --experimental-strip-types scripts/preview-provider-fixture.ts',url:'http://127.0.0.1:4179',reuseExistingServer:false,timeout:60000},
+  ],
   projects:[
     {name:'chromium',testIgnore:'accessibility.spec.ts',use:{...devices['Desktop Chrome']}},
     {name:'firefox',testIgnore:'accessibility.spec.ts',use:{...devices['Desktop Firefox']}},

@@ -1,6 +1,6 @@
 # Testing and local preview
 
-Use Node 24 or later in a local workspace. Install with `pnpm install --frozen-lockfile`.
+Use Node 24.22.1 LTS (or Node 26.12.1 or later within the 26.x line) in a local workspace. Install with `pnpm install --frozen-lockfile`.
 
 - `pnpm test`: model, crypto, migration, adapter and failure-recovery tests.
 - `pnpm test:ci`: also requires and executes PostgreSQL/WASM policy fixtures.

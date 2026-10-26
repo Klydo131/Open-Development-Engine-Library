@@ -6,7 +6,7 @@ in the engine, an adapter, or the example application.
 
 ## Local development
 
-Use Node.js 24 LTS and pnpm 11.19.0. Install with
+Use Node.js 24.22.1 LTS and pnpm 11.28.8. Install with
 `pnpm install --frozen-lockfile` and run `pnpm dev`.
 The source layout is described in [Architecture](docs/ARCHITECTURE.md).
 

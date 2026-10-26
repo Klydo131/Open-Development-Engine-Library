@@ -36,7 +36,7 @@ services. Portal authorization does not grant access to private vaults. See
 
 ## Run locally
 
-Use Node.js 24 LTS and pnpm 11.19.0, matching the package-manager pin.
+Use Node.js 24.22.1 LTS and pnpm 11.28.8, matching the package-manager pin.
 
 ```sh
 pnpm install --frozen-lockfile --ignore-scripts

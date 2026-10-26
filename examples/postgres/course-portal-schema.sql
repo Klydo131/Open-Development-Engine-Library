@@ -213,6 +213,13 @@ begin
     if not exists(select 1 from public.portal_courses where id=target_course and (status='published' or portal_private.is_admin())) then
       raise exception 'Course unavailable.' using errcode='42501'; end if;
   end if;
+  if current_setting('transaction_isolation') <> 'read committed' then
+    raise exception 'Request creation requires READ COMMITTED isolation.' using errcode='25000'; end if;
+  -- Serialize accepted writes while allowing inbox reads. A fresh snapshot after
+  -- the lock observes the preceding writer before enforcing the reader's bound.
+  lock table public.portal_support_threads in share row exclusive mode;
+  if (select count(*) from public.portal_support_threads) >= 100 then
+    raise exception 'Request capacity reached; operator pagination is required.' using errcode='22023'; end if;
   insert into public.portal_support_threads(learner_id,course_id,subject,message)
     values(portal_private.actor_id(),target_course,p_question->>'subject',p_question->>'message');
 end $$;

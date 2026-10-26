@@ -7,6 +7,11 @@ behavior or repository protection settings.
 
 ## Gates and speed
 
+CI selects the security-patched Node.js version in `.node-version` before
+installing pnpm 11.28.8 with scripts disabled. The second Node setup step enables
+the pnpm store cache after the package manager is available. Runtime support is
+limited to patched 24.x and 26.x release lines declared in `package.json`.
+
 The engine job installs the frozen lockfile with lifecycle scripts disabled,
 runs pinned Oxlint correctness checks and TypeScript before the unit/SDK/PostgreSQL fixtures, builds the portable packages and both web
 entries, tests packed packages in an isolated offline consumer, then checks
