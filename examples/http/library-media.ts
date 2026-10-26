@@ -11,6 +11,8 @@ export type LibraryMediaOptions = {
   /** A real malware scanner, configured by the operator. No scanner fails closed. */
   scan?: (bytes: Uint8Array, name: string) => Promise<'clean'|'blocked'|'unavailable'>;
   bodyTimeoutMs?: number;
+  scanTimeoutMs?: number;
+  maxConcurrentUploads?: number;
 };
 class MediaRequestError extends Error {
   readonly status: number;
@@ -68,14 +70,14 @@ async function readBody(request: Request, timeoutMs: number): Promise<Uint8Array
     try { reader.releaseLock(); } catch { /* An already released reader needs no cleanup. */ }
   }
 }
-async function scanFile(scan: NonNullable<LibraryMediaOptions['scan']>, bytes: Uint8Array, name: string) {
+async function scanFile(task: Promise<unknown>, timeoutMs: number, deadline: number) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    // Own a separate bounded copy. A scanner cannot mutate the bytes we store.
     const result=await Promise.race([
-      Promise.resolve().then(()=>scan(new Uint8Array(bytes),name)),
-      new Promise<'unavailable'>(resolve=>{timer=setTimeout(()=>resolve('unavailable'),15000);}),
+      task,
+      new Promise<'unavailable'>(resolve=>{timer=setTimeout(()=>resolve('unavailable'),timeoutMs);}),
     ]);
+    if (performance.now()>=deadline) throw new MediaRequestError(503,'File safety checking exceeded its deadline. Try again later.');
     if (result==='blocked') throw new MediaRequestError(422,'This file could not pass the safety check.');
     if (result!=='clean') throw new MediaRequestError(503,'File safety checking is unavailable. Try again later.');
   } catch(error) {
@@ -86,8 +88,11 @@ async function scanFile(scan: NonNullable<LibraryMediaOptions['scan']>, bytes: U
 export function createLibraryMediaHandler(options: LibraryMediaOptions): (request: Request)=>Promise<Response> {
   const url=new URL(options.portalUrl);
   if (!['http:','https:'].includes(url.protocol) || url.username || url.password || url.origin==='null') throw new TypeError('Configure an HTTP(S) portal origin.');
-  const origin=url.origin,bodyTimeoutMs=options.bodyTimeoutMs??5000;
+  const origin=url.origin,bodyTimeoutMs=options.bodyTimeoutMs??5000,scanTimeoutMs=options.scanTimeoutMs??15000,maxConcurrentUploads=options.maxConcurrentUploads??2;
   if (!Number.isSafeInteger(bodyTimeoutMs) || bodyTimeoutMs<1 || bodyTimeoutMs>5000) throw new TypeError('Body deadline must be between 1 and 5000 milliseconds.');
+  if (!Number.isSafeInteger(scanTimeoutMs) || scanTimeoutMs<1 || scanTimeoutMs>15000) throw new TypeError('Scan deadline must be between 1 and 15000 milliseconds.');
+  if (!Number.isSafeInteger(maxConcurrentUploads) || maxConcurrentUploads<1 || maxConcurrentUploads>16) throw new TypeError('Use between 1 and 16 concurrent uploads.');
+  let activeUploads=0;
   return async request=>{
     const headers=new Headers({'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin'});
     const requestOrigin=request.headers.get('origin');
@@ -98,7 +103,7 @@ export function createLibraryMediaHandler(options: LibraryMediaOptions): (reques
       headers.set('Access-Control-Expose-Headers','X-Library-Media');
     }
     const json=(status:number,value:unknown)=>{headers.set('Content-Type','application/json');return new Response(JSON.stringify(value),{status,headers});};
-    let uploadAuthorized=false;
+    let uploadAuthorized=false,reserved=false,scanTask:Promise<unknown>|undefined;
     try {
       if (requestOrigin!==null && requestOrigin!==origin) throw new MediaRequestError(403,'Origin is not allowed.');
       if (request.method==='OPTIONS') return new Response(null,{status:204,headers});
@@ -118,10 +123,23 @@ export function createLibraryMediaHandler(options: LibraryMediaOptions): (reques
         if (length!==null && Number(length)>MEDIA_LIMITS.fileBytes) throw new MediaRequestError(413,'Choose a file of 10 MiB or less.');
         let name:string;
         try { name=decodeURIComponent(request.headers.get('x-file-name')??''); } catch { throw new MediaRequestError(400,'Choose a valid filename.'); }
+        if (activeUploads>=maxConcurrentUploads) {
+          headers.set('Retry-After','1');
+          return json(503,{error:'File checking is busy. Try again later.'});
+        }
+        activeUploads++;reserved=true;
         const bytes=await readBody(request,bodyTimeoutMs);
         let media;
         try { media=await describePortalMedia(name,bytes); } catch { throw new MediaRequestError(400,'Choose a supported file whose contents match its filename.'); }
-        await scanFile(options.scan,bytes,name);
+        const scan=options.scan,deadline=performance.now()+scanTimeoutMs;
+        scanTask=Promise.resolve().then(()=>{
+          if (performance.now()>=deadline) throw new MediaRequestError(503,'File safety checking exceeded its deadline. Try again later.');
+          // The scanner receives its own bounded copy and cannot alter stored bytes.
+          const copy=new Uint8Array(bytes);
+          if (performance.now()>=deadline) throw new MediaRequestError(503,'File safety checking exceeded its deadline. Try again later.');
+          return scan(copy,name);
+        });
+        await scanFile(scanTask,scanTimeoutMs,deadline);
         await options.store.put(actorId,media,bytes);
         return json(201,media);
       }
@@ -141,6 +159,13 @@ export function createLibraryMediaHandler(options: LibraryMediaOptions): (reques
         try { cancel(request.body); } catch { /* Authentication errors must not inspect a hostile body. */ }
       }
       return error instanceof MediaRequestError?json(error.status,{error:error.message}):json(503,{error:'Library file service is unavailable. Try again later.'});
+    } finally {
+      if (reserved) {
+        const release=()=>{activeUploads--;};
+        // A response timeout does not stop scanner work. Retain its slot until
+        // actual settlement, and never release while storage is still running.
+        if (scanTask) void scanTask.then(release,release); else release();
+      }
     }
   };
 }

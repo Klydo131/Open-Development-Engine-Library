@@ -1,5 +1,9 @@
 # Bounded HTTP JSON transport
 
+For server-side upload admission and the surrounding gateway/runtime controls,
+see [security layers](SECURITY-LAYERS.md). Assess dependency and runtime changes
+using the [maintenance procedure](SECURITY-MAINTENANCE.md).
+
 [`examples/http/bounded-fetch.ts`](../examples/http/bounded-fetch.ts) provides an optional, dependency-free Fetch adapter for bounded JSON requests. It limits response bytes before a provider SDK parses them and applies one deadline across response headers and body consumption. It is separate from the catalog, education and portal contract packages.
 
 ```ts

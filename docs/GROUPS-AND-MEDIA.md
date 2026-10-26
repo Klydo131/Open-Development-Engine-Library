@@ -115,11 +115,21 @@ handler. Deploy it as `library-media` for the reference portal, supplying:
 POST accepts raw `application/octet-stream` bytes and a URI-encoded filename in
 `X-File-Name`. It returns validated attachment metadata after scanning/storage.
 Only administrators upload. The body-read deadline defaults to five seconds
-and cannot exceed it; scanner results have a 15-second response deadline. The
-scanner receives a separate bounded copy of the bytes. A response deadline does
-not stop an external scanner's underlying work; bound scanner concurrency and
-execution in the deployment too. Authentication and database I/O need their own
-timeouts. The browser's fetch deadline is 30 seconds.
+and cannot exceed it. `scanTimeoutMs` defaults to 15,000 milliseconds and accepts
+integers from 1 through 15,000. `maxConcurrentUploads` defaults to 2 and accepts
+integers from 1 through 16. Reuse one handler per application/worker instance:
+it reserves upload capacity before body consumption, and rejects overflow with
+503 and `Retry-After: 1` without queuing it. Admitted body, scanner and storage
+work occupies that capacity. A timed-out scan keeps its slot until the actual
+scanner promise settles and the handler has finished; a late clean result cannot
+store a file. The scanner receives a separate bounded byte copy.
+
+This admission limit is per handler, not per fleet. It does not cover
+authentication or GET downloads. A response deadline cannot interrupt blocked
+JavaScript or terminate an external scanner; operators still need bounded worker
+execution, gateway/shared quotas and recovery for stuck scans. Authentication
+and database I/O need their own timeouts. The browser's fetch deadline is 30
+seconds. See [security layers](SECURITY-LAYERS.md) for configuration and limits.
 
 GET selects an ID using `X-Media-Id`. Authorized downloads use
 `application/octet-stream`, `Content-Disposition: attachment`, `no-store` and
