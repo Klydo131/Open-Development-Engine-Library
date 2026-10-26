@@ -2,6 +2,10 @@
 
 ## Unreleased — 26 October 2026
 
+- The course-library homepage presents course previews, local metadata search,
+  available-language filters and clear links to learning and study spaces.
+  Layout and reading-size controls adapt to smaller screens. Course visibility
+  continues to follow the configured provider's permissions.
 - Catalog backup headers validate canonical encoding without decoding and
   re-encoding the full ciphertext. Encryption and backup formats are unchanged.
 - Course and group navigation remains usable when the separate support or
