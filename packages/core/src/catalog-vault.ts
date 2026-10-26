@@ -6,12 +6,16 @@ export type CatalogEnvelope = {
   kdf: 'PBKDF2-SHA256'; iterations: number; salt: string; iv: string; ciphertext: string;
 };
 const encoder = new TextEncoder();
+const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 const maximumCiphertext = Math.ceil((CATALOG_LIMITS.bundleBytes + 16) / 3) * 4;
-function canonicalBase64(value: unknown, expectedBytes?: number, maxLength = maximumCiphertext): Uint8Array<ArrayBuffer> {
-  if (typeof value !== 'string' || value.length > maxLength || value.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(value)) throw new Error('Invalid catalog vault encoding.');
-  const bytes = fromBase64(value);
-  if ((expectedBytes !== undefined && bytes.length !== expectedBytes) || toBase64(bytes) !== value) throw new Error('Invalid catalog vault encoding.');
-  return bytes;
+function canonicalBase64Length(value: unknown, expectedBytes?: number, maxLength = maximumCiphertext): number {
+  if (typeof value !== 'string' || value.length > maxLength || value.length % 4 !== 0 || /[^A-Za-z0-9+/=]/.test(value)) throw new Error('Invalid catalog vault encoding.');
+  const padding = value.endsWith('==') ? 2 : value.endsWith('=') ? 1 : 0;
+  const end = value.length - padding;
+  const length = value.length / 4 * 3 - padding;
+  // Canonical padding has zero unused bits; validation needs no decoded buffer.
+  if (value.indexOf('=') !== (padding ? end : -1) || (padding && (alphabet.indexOf(value[end - 1]) & (padding === 2 ? 15 : 3)) !== 0) || (expectedBytes !== undefined && length !== expectedBytes)) throw new Error('Invalid catalog vault encoding.');
+  return length;
 }
 /** Strict bounded header validation happens before password derivation. */
 export function validateCatalogEnvelope(value: unknown): CatalogEnvelope {
@@ -19,8 +23,8 @@ export function validateCatalogEnvelope(value: unknown): CatalogEnvelope {
   const source = value as Record<string, unknown>;
   if (Object.keys(source).some(key => !['format','version','revision','kdf','iterations','salt','iv','ciphertext'].includes(key)) || source.format !== 'open-library-catalog-vault' || source.version !== 1 || source.kdf !== 'PBKDF2-SHA256' || source.iterations !== ITERATIONS || typeof source.revision !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(source.revision)) throw new Error('Unsupported catalog vault.');
   validateCatalogIdentifier(source.revision);
-  canonicalBase64(source.salt, 16, 24); canonicalBase64(source.iv, 12, 16);
-  if (canonicalBase64(source.ciphertext).length < 16) throw new Error('Damaged catalog vault.');
+  canonicalBase64Length(source.salt, 16, 24); canonicalBase64Length(source.iv, 12, 16);
+  if (canonicalBase64Length(source.ciphertext) < 16) throw new Error('Damaged catalog vault.');
   return {format: 'open-library-catalog-vault', version: 1, revision: source.revision, kdf: 'PBKDF2-SHA256', iterations: ITERATIONS, salt: source.salt as string, iv: source.iv as string, ciphertext: source.ciphertext as string};
 }
 function aad(envelope: Pick<CatalogEnvelope, 'revision' | 'salt'>): Uint8Array<ArrayBuffer> {
@@ -28,7 +32,7 @@ function aad(envelope: Pick<CatalogEnvelope, 'revision' | 'salt'>): Uint8Array<A
 }
 /** Sessions come from createSession(); AES-GCM and PBKDF2 use the existing frozen parameters. */
 export async function sealCatalog(bundle: CatalogBundle, session: VaultSession): Promise<CatalogEnvelope> {
-  canonicalBase64(session.salt, 16, 24);
+  canonicalBase64Length(session.salt, 16, 24);
   const header = {revision: bundle.catalog.revision, salt: session.salt};
   const plain = encoder.encode(await exportCatalogBundle(bundle));
   const iv = crypto.getRandomValues(new Uint8Array(12));

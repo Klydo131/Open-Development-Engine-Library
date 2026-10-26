@@ -1,5 +1,19 @@
 # Changes
 
+## Unreleased — 26 October 2026
+
+- Catalog backup headers validate canonical encoding without decoding and
+  re-encoding the full ciphertext. Encryption and backup formats are unchanged.
+- Course and group navigation remains usable when the separate support or
+  teacher-request service is temporarily unavailable, with an explicit retry.
+- Portal browser settings and security headers use the same root environment
+  directory, including when the configuration command runs from another folder.
+- PostgreSQL request creation now enforces the same shared capacity as staff
+  inbox reads. Existing installations have a data-preserving upgrade script;
+  see [database setup](docs/POSTGRESQL.md).
+- CI uses Node.js 24.22.1 and pnpm 11.28.8, installing the patched runtime before
+  the package manager. Dependency lifecycle scripts remain disabled.
+
 ## Unreleased — 23 October 2026
 
 - The course portal includes optional Learner/Admin guides, study-group

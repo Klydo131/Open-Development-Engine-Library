@@ -6,7 +6,7 @@ to inspect hosted results; this document does not assert that a particular run p
 
 ## Reproduce checks
 
-From the repository root, using Node.js 24 LTS and pnpm 11.19.0:
+From the repository root, using Node.js 24.22.1 LTS and pnpm 11.28.8:
 
 ```sh
 pnpm install --frozen-lockfile --ignore-scripts

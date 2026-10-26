@@ -299,7 +299,12 @@ begin
   if jsonb_typeof(p_request) is distinct from 'object' or not p_request ?& array['subject','message']
     or (p_request-array['subject','message'])<>'{}'::jsonb or not portal_private.text_ok(p_request->'subject',160,true)
     or not portal_private.text_ok(p_request->'message',2000,true) then raise exception 'Invalid teacher request.' using errcode='22023'; end if;
-  perform 1 from portal_private.accounts where id=portal_private.actor_id() for update;
+  if current_setting('transaction_isolation') <> 'read committed' then
+    raise exception 'Request creation requires READ COMMITTED isolation.' using errcode='25000'; end if;
+  -- Match the staff reader's total bound, including requests already assigned.
+  lock table public.portal_teacher_requests in share row exclusive mode;
+  if (select count(*) from public.portal_teacher_requests) >= 100 then
+    raise exception 'Request capacity reached; operator pagination is required.' using errcode='22023'; end if;
   if (select count(*) from public.portal_teacher_requests where learner_id=portal_private.actor_id())>=100 then raise exception 'Teacher request limit reached.' using errcode='22023'; end if;
   insert into public.portal_teacher_requests(learner_id,subject,message) values(portal_private.actor_id(),p_request->>'subject',p_request->>'message');
 end $$;

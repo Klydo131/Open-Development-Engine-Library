@@ -136,3 +136,16 @@ account. Revoking a staff grant does not perform this lifecycle work.
 The examples reject over-limit responses rather than silently truncating them.
 They do not provide pagination or automated retention. Test policy and lifecycle
 changes with actual PostgreSQL and the intended gateway before serving users.
+
+Support and teacher-request queues each accept at most 100 records across the
+installation, including answered or assigned records. Inserts serialize the
+capacity check under READ COMMITTED isolation before accepting a request, so
+accepted requests cannot overflow the bounded staff reader. This is a capacity
+boundary, not a substitute for request rate limits or a retention policy.
+
+For an existing core-and-groups installation, rehearse
+`examples/postgres/migrations/2026-10-26-request-capacity.sql` on a restored copy.
+The migration locks both queues, aborts if either already exceeds 100 records,
+and preserves all data. If it aborts, prepare an authorized retention or
+pagination migration before retrying. Never delete learner requests merely to
+make an upgrade pass. Fresh installations already include these guards.
