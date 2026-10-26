@@ -1,5 +1,9 @@
 # Architecture
 
+For the security boundaries, implemented controls and deployment obligations,
+see [security layers](SECURITY-LAYERS.md) and
+[security maintenance](SECURITY-MAINTENANCE.md).
+
 The engine models a library independently of how a person learns from it.
 Learn and Apply is one consumer of that engine. Applications can supply their
 own interface and tools without adopting the sample's lesson or practice model.

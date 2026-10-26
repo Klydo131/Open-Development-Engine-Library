@@ -2,6 +2,10 @@
 
 ## Unreleased — 26 October 2026
 
+- Hosted media uploads share a bounded admission limit, including scans that
+  outlive their response deadline. Saturated handlers reject before reading
+  another upload; late clean results cannot store an expired upload. Developer
+  guides explain deployment security layers and artifact-aware patch review.
 - The course-library homepage presents course previews, local metadata search,
   available-language filters and clear links to learning and study spaces.
   Layout and reading-size controls adapt to smaller screens. Course visibility

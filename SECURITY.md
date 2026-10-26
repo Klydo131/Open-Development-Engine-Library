@@ -32,6 +32,21 @@ client code have not established isolation in a live deployment.
 Hosting headers, dependencies, migration and storage adapters remain part of
 security review.
 
+The separate course-library application uses provider-neutral contracts and
+PostgreSQL reference schemas for institutional accounts, roles, courses,
+support, groups, invitations and private teacher rooms. These shared records
+are readable by the service and authorized participants; they are not the
+personal passphrase vault and are not end-to-end encrypted. The default portal
+is a temporary in-memory demonstration, not a production account service.
+
+Optional Fetch handlers deliver invitations and accept scanned file uploads.
+Their authentication callbacks, mailer, scanner, hosting and database pool
+are trusted operator integrations. Reuse a handler instance to share its upload
+admission state; fleet-wide traffic limits and worker isolation belong to the
+deployment. See [security layers](docs/SECURITY-LAYERS.md) and
+[security maintenance](docs/SECURITY-MAINTENANCE.md) for code boundaries,
+operator controls and patch verification.
+
 ## Threat model and trust boundaries
 
 Treat library imports, backup envelopes, links, filenames, file contents,
@@ -68,6 +83,12 @@ request metadata and account identifiers when that service is enabled.
   to the authenticated owner's records and preserve revision checks.
 - Errors, tests and operational logs must not disclose library plaintext,
   passphrases or access tokens.
+- Institutional access must verify current accounts, roles and resource
+  permissions at the service/database boundary, including group membership
+  and assigned teacher-room participants.
+- Hosted uploads require an actual clean scanner result. Bound concurrent
+  work, keep timed-out scans accounted for until they actually settle, and
+  never persist an upload from a late clean result after its scan deadline.
 
 ## Findings and severity context
 
@@ -90,8 +111,10 @@ decoders and browsers need current security updates.
 Encrypted snapshots do not prevent offline passphrase guessing, ciphertext
 rollback by a malicious storage operator, deletion, or denial of service.
 Revision checks prevent ordinary stale writes; they are not an authenticated
-history or collaboration protocol. Automatic or multi-key rotation, recovery, secure-memory
-erasure, large-file streaming, and multi-user permissions need further work.
+history or collaboration protocol. Automatic or multi-key rotation, recovery,
+secure-memory erasure and large-file streaming need further work. Institutional
+permissions have reference implementations and tests; live isolation still
+requires deployment-specific verification.
 
 Browser storage can be evicted or cleared. Locking drops application references;
 JavaScript cannot guarantee immediate zeroization of memory.
