@@ -186,7 +186,7 @@ test('official release fetch fixes its origin, disables redirects and rejects un
   await assert.rejects(fetchNodeIndex(async()=>new Response('x'.repeat(2*1024*1024+1))));
 });
 
-test('CLI rejects invalid options through direct and symlink or junction entry paths',t=>{
+test('CLI checks execute through direct and symlink or junction entry paths',t=>{
   const directory=mkdtempSync(join(tmpdir(),'library-runtime-entry-'));
   const alias=join(directory,'scripts');
   const source=fileURLToPath(new URL('../scripts/',import.meta.url));
@@ -198,5 +198,12 @@ test('CLI rejects invalid options through direct and symlink or junction entry p
     assert.equal(result.status,1,'Every CLI path must execute the check and fail closed.');
     assert.equal(result.stdout,'');
     assert.match(result.stderr,/Runtime security check could not complete/);
+  }
+  for(const entry of [join(source,'check-bundle.ts'),join(alias,'check-bundle.ts')]){
+    const result=spawnSync(process.execPath,['--experimental-strip-types',entry],{cwd:directory,encoding:'utf8',timeout:10000});
+    assert.equal(result.error,undefined);
+    assert.equal(result.status,1,'Every bundle-check path must reject missing build artifacts.');
+    assert.equal(result.stdout,'');
+    assert.match(result.stderr,/ENOENT/);
   }
 });

@@ -10,6 +10,7 @@ on:
       - '.node-version'
       - 'runtime-security.json'
       - 'scripts/security-runtime.ts'
+      - 'scripts/check-bundle.ts'
       - 'tests/security-runtime.test.ts'
       - 'examples/http/bounded-fetch.ts'
       - 'package.json'
