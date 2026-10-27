@@ -27,6 +27,8 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: '.node-version'
+      - name: Check reviewed runtime policy
+        run: node --experimental-strip-types scripts/security-runtime.ts
       - name: Install pinned package manager
         run: npm install --global pnpm@11.28.8 --ignore-scripts
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0

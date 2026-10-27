@@ -8,6 +8,7 @@ behavior or repository protection settings.
 ## Gates and speed
 
 CI selects the security-patched Node.js version in `.node-version` before
+checking the expiring [runtime security policy](RUNTIME-UPDATES.md) and
 installing pnpm 11.28.8 with scripts disabled. The second Node setup step enables
 the pnpm store cache after the package manager is available. Runtime support is
 limited to patched 24.x and 26.x release lines declared in `package.json`.
@@ -57,7 +58,9 @@ Neither command publishes packages.
 
 ## Trust boundaries
 
-Only push, pull-request and manual checks are configured. There is no privileged
+Main CI uses push, pull-request and manual checks. A separate daily security
+maintenance workflow checks advisories; relevant PRs and manual runs also test
+the runtime-policy tooling on Linux, Windows and macOS. There is no privileged
 pull-request workflow, self-hosted runner, automatic merge, publication or deploy
 command. The token receives repository contents read permission; checkout does
 not persist credentials. Actions use reviewed full commit IDs. Node and pnpm
