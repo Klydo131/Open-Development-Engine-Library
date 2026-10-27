@@ -8,6 +8,8 @@
     "dev": "vite --config apps/web/vite.config.ts --host 127.0.0.1",
     "lint": "oxlint --deny-warnings --report-unused-disable-directives apps packages examples tests scripts playwright.config.ts",
     "typecheck": "tsc --noEmit",
+    "security:runtime": "node --experimental-strip-types scripts/security-runtime.ts",
+    "security:updates": "node --experimental-strip-types scripts/security-runtime.ts --online",
     "build": "pnpm typecheck && tsc -p packages/core/tsconfig.json && tsc -p packages/education/tsconfig.json && tsc -p packages/portal/tsconfig.json && vite build --config apps/web/vite.config.ts",
     "preview": "vite preview --config apps/web/vite.config.ts --host 127.0.0.1",
     "configure:portal": "node --experimental-strip-types scripts/configure-portal.ts",
@@ -19,21 +21,21 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",
-    "lucide-react": "1.45.0",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "lucide-react": "1.61.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.13.0",
-    "@electric-sql/pglite": "0.5.10",
-    "@playwright/test": "1.63.0",
-    "@types/node": "26.5.1",
+    "@axe-core/playwright": "4.14.0",
+    "@electric-sql/pglite": "0.5.12",
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "fake-indexeddb": "6.2.5",
+    "fake-indexeddb": "6.2.6",
     "oxlint": "1.89.0",
     "typescript": "7.0.2",
-    "vite": "8.3.3"
+    "vite": "8.3.5"
   },
   "license": "MIT",
   "engines": {

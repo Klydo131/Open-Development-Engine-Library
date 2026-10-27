@@ -3,6 +3,8 @@
 Security controls and patched software serve different purposes. Request bounds
 reduce accepted work; they do not repair a vulnerable runtime or native library.
 Use the [layer guide](SECURITY-LAYERS.md) to identify where each control runs.
+Use the [runtime update checks](RUNTIME-UPDATES.md) for the expiring reviewed
+policy, daily advisory workflow and production integration procedure.
 
 ## Keep an artifact inventory
 

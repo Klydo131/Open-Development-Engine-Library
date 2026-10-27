@@ -1,5 +1,8 @@
 packages:
   - packages/*
 
+minimumReleaseAgeExclude:
+  - '@electric-sql/pglite@0.5.12'
+
 overrides:
   source-map-js: 1.2.2

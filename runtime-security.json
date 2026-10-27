@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T21:10:00.000Z",
+  "expiresAt": "2026-11-02T21:10:00.000Z",
+  "node": {
+    "24": {"minimum": "24.22.1", "supportedUntil": "2028-04-30T23:59:59.000Z"},
+    "26": {"minimum": "26.12.1", "supportedUntil": "2029-04-30T23:59:59.000Z"}
+  },
+  "java": {"usedByEngine": false, "vendorReviewRequired": true},
+  "sources": [
+    "https://nodejs.org/en/blog/vulnerability/october-2026-security-releases",
+    "https://github.com/nodejs/Release#release-schedule",
+    "https://www.oracle.com/security-alerts/alert-cve-2026-114820.html",
+    "https://openjdk.org/emudhra"
+  ]
+}

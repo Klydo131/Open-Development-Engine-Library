@@ -1,4 +1,4 @@
-import {readFileSync} from 'node:fs';
+import {readFileSync, realpathSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {gzipSync} from 'node:zlib';
@@ -33,7 +33,7 @@ export function requireBundleBudget(size: Size, budget: Size = INITIAL_BUDGET): 
   }
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   const directory = resolve('apps/web/dist');
   for (const entry of ['index.html', 'portal.html']) {
     const size = initialBundleSize(readFileSync(resolve(directory, entry), 'utf8'), path => readFileSync(resolve(directory, path.slice(1))));

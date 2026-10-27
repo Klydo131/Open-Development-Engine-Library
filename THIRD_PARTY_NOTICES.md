@@ -1,6 +1,6 @@
 # Third-party notices
 
-Open Development Engine Library — inventory reviewed 22 October 2026.
+Open Development Engine Library — inventory reviewed 27 October 2026.
 
 The project's original source is licensed separately in [LICENSE](LICENSE).
 This repository distributes its source, dependency declarations and lockfile;
@@ -32,9 +32,9 @@ presence here does not imply a configured online service or enabled feature.
 | [@supabase/storage-js](https://www.npmjs.com/package/@supabase/storage-js/v/2.118.0) | 2.118.0 | MIT |
 | [@supabase/supabase-js](https://www.npmjs.com/package/@supabase/supabase-js/v/2.118.0) | 2.118.0 | MIT |
 | [iceberg-js](https://www.npmjs.com/package/iceberg-js/v/0.8.1) | 0.8.1 | MIT |
-| [lucide-react](https://www.npmjs.com/package/lucide-react/v/1.45.0) | 1.45.0 | ISC; MIT for the listed Feather-derived icons |
-| [react](https://www.npmjs.com/package/react/v/19.3.0) | 19.3.0 | MIT |
-| [react-dom](https://www.npmjs.com/package/react-dom/v/19.3.0) | 19.3.0 | MIT |
+| [lucide-react](https://www.npmjs.com/package/lucide-react/v/1.61.0) | 1.61.0 | ISC; MIT for the listed Feather-derived icons |
+| [react](https://www.npmjs.com/package/react/v/19.3.1) | 19.3.1 | MIT |
+| [react-dom](https://www.npmjs.com/package/react-dom/v/19.3.1) | 19.3.1 | MIT |
 | [scheduler](https://www.npmjs.com/package/scheduler/v/0.28.0) | 0.28.0 | MIT |
 | [tslib](https://www.npmjs.com/package/tslib/v/2.8.1) | 2.8.1 | 0BSD |
 
@@ -47,8 +47,8 @@ with the assets when copying or deploying the output directory.
 
 ## React, React DOM and Scheduler — MIT
 
-Applies to react 19.3.0, react-dom 19.3.0 and scheduler 0.28.0; their installed
-LICENSE files match. [Upstream license](https://github.com/react/react/blob/v19.3.0/LICENSE).
+Applies to react 19.3.1, react-dom 19.3.1 and scheduler 0.28.0; their installed
+LICENSE files match. [Upstream license](https://github.com/react/react/blob/v19.3.1/LICENSE).
 
 ```text
 MIT License
@@ -165,7 +165,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## Lucide React 1.45.0 — ISC and Feather-derived MIT notices
+## Lucide React 1.61.0 — ISC and Feather-derived MIT notices
 
 The package metadata declares ISC. Its shipped LICENSE additionally identifies
 Feather-derived icons and supplies their MIT notice. Both are retained in full,
@@ -240,7 +240,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 ## Build-generated helpers
 
-Vite 8.3.3 and its resolved Rolldown 1.2.14 are build dependencies, outside the
+Vite 8.3.5 and its resolved Rolldown 1.2.14 are build dependencies, outside the
 13-package production graph. The notices below are also retained for generated
 runtime helpers and copied build fragments. This does not imply that the browser
 bundle redistributes the entire build toolchain or its native binaries.
@@ -248,7 +248,7 @@ bundle redistributes the entire build toolchain or its native binaries.
 ### Vite core — MIT
 
 This is the core-license section of the installed Vite LICENSE.md.
-[Upstream core license](https://github.com/vitejs/vite/blob/v8.3.3/LICENSE).
+[Upstream core license](https://github.com/vitejs/vite/blob/v8.3.5/LICENSE).
 Redistribution of Vite itself also requires reviewing its full bundled-dependency
 license document; that larger tooling inventory is outside this runtime notice.
 

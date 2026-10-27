@@ -1,5 +1,15 @@
 # Changes
 
+## Unreleased — 27 October 2026
+
+- Runtime maintenance checks enforce reviewed security minimums and review
+  deadlines, with bounded official advisory checks and executable inventory.
+  Daily repository checks and dependency update proposals support patch review;
+  maintenance tooling is tested on Linux, Windows and macOS.
+- Compatible application and test-tool updates refresh rendering, build,
+  database-fixture and accessibility checks. Platform guidance distinguishes
+  automated browser coverage from physical-device verification.
+
 ## Unreleased — 26 October 2026
 
 - Hosted media uploads share a bounded admission limit, including scans that
