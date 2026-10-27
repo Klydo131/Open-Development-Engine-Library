@@ -1,4 +1,4 @@
-import {portalId, validateCourse, validateSupportQuestion, validateSupportReply, type Course, type CoursePortal, type Material, type PortalAccount, type SupportThread} from '../../../packages/portal/src/index.ts';
+import {portalId, validateCourse, validateSupportQuestion, validateSupportReply, type Course, type CoursePortal, type Material, type PortalAccount, type SupportThread, type TeachingGuide} from '../../../packages/portal/src/index.ts';
 import {createDemoGroups} from './portal-demo-groups.ts';
 import {createDemoMedia} from './portal-media-demo.ts';
 
@@ -10,14 +10,35 @@ export interface DemoCoursePortal extends CoursePortal {
 }
 
 const original = 'Original Open Learning Rooms sample; CC BY 4.0.';
-const material = (title:string,text:string):Material => ({id:crypto.randomUUID(),title,text,sourceUrl:'',credit:'Open Learning Rooms',rights:original});
+const material = (title:string,text:string,teaching:TeachingGuide):Material => ({id:crypto.randomUUID(),title,text,sourceUrl:'',credit:'Open Learning Rooms',rights:original,teaching});
 function samples():Course[] {
   return [
     {id:crypto.randomUUID(),revision:crypto.randomUUID(),title:'Notice motion',summary:'Explore how a gentle push changes motion. Use observations, then explain your thinking in your own words.',language:'en',status:'published',lessons:[
-      material('A small push','Read\nA force is a push or pull. A change in motion can be speeding up, slowing down or changing direction.\n\nTry\nOn a clear table, gently push a lightweight object. Stop if it could fall. What changed? You can also imagine the example instead.\n\nCheck\nDescribe the change without saying that a force always makes an object move faster.\n\nPlan\nChoose another everyday example. Explain it to someone or sketch it for yourself.'),
-      material('When forces balance','Read\nA book resting on a table has forces acting on it. Gravity pulls it down and the table supports it. When these forces balance, the book does not accelerate.\n\nTry\nDraw two arrows for the forces on the book.\n\nCheck\nDo your arrows show opposite directions? Why can an object have forces acting on it while staying still?\n\nPlan\nWrite one question you would like help with.') ]},
+      material('A small push','A force is a push or pull. A change in motion can be speeding up, slowing down or changing direction. When forces do not balance, the motion changes. A force does not always make an object move faster.',{
+        goal:'Explain how a push or pull can change speed or direction.',
+        connection:'Think about gently closing a drawer. What changes when you push it? Imagining the movement is enough; you do not need to move anything.',
+        workedExample:'1. Imagine a ball already rolling.\n2. A gentle push from the side changes its direction.\n3. Its change in motion shows that the forces on it did not balance.',
+        practice:'Imagine a toy car receiving a gentle push from one side. Sketch its possible path or describe what may change. Then choose a different everyday example.',
+        checkQuestion:'A rolling ball slows down even when nobody touches it. Does that mean no forces are acting? Explain why or why not.',
+        checkExplanation:'No. The surface and the air can exert forces on the ball. A net force opposite its motion can slow it down. Look for a change in speed or direction, rather than assuming every force makes something faster.',
+      }),
+      material('When forces balance','A book resting on a table has forces acting on it. Gravity pulls it down and the table supports it. When these forces balance, the book does not accelerate. Balanced forces can also act on an object moving at a steady speed in a straight line.',{
+        goal:'Explain how an object can remain still while forces act on it.',
+        connection:'Think about a book resting on a table. It looks still, but what keeps it from falling through the table?',
+        workedExample:'1. Gravity pulls the book downward.\n2. The table pushes upward on the book.\n3. Equal forces in opposite directions balance, so the book does not accelerate.',
+        practice:'Draw the book and two equal arrows in opposite directions, or describe the two forces in words. Explain why a still object can have forces acting on it.',
+        checkQuestion:'If an object moves at a steady speed in a straight line, must the forces on it be unbalanced?',
+        checkExplanation:'No. Its velocity is unchanged, so its acceleration is zero and the forces balance. In a real sliding example, an applied push may balance friction. Balanced forces do not require the object to be at rest.',
+      }) ]},
     {id:crypto.randomUUID(),revision:crypto.randomUUID(),title:'Find a steady pulse',summary:'Notice an even musical pulse with a short, untimed practice. No instrument or recording is required.',language:'en',status:'published',lessons:[
-      material('Listen, count, pause','Read\nA pulse is a steady reference for music. Rhythms can fit around that pulse.\n\nTry\nCount one, two, three, four at a comfortable pace. If comfortable, tap along; imagining or looking at written counts works too. Pause whenever you need.\n\nCheck\nWere the gaps between your counts similar? Try again slowly without judging the first attempt.\n\nPlan\nDescribe one way you could keep a pulse during a familiar song. No recording needs to be uploaded.') ]},
+      material('Listen, count, pause','A pulse is a steady reference for music. Rhythms can fit around that pulse. An even pulse has similar gaps between beats; the rhythm can use different patterns around them.',{
+        goal:'Describe an even pulse and distinguish it from a rhythm pattern.',
+        connection:'Imagine steady footsteps. You can notice the similar gaps without moving or making a sound.',
+        workedExample:'1. Imagine four equally spaced beats: one, two, three, four.\n2. Keep that spacing steady.\n3. Imagine a rhythm with two short sounds inside one beat. The rhythm changed, while the underlying pulse stayed steady.',
+        practice:'Count four beats at a comfortable pace, silently or aloud. Pause whenever you need. Imagine or write a short rhythm over the same even beats; no instrument or recording is required.',
+        checkQuestion:'If a rhythm adds more sounds between the beats, does the pulse have to get faster? Explain your thinking.',
+        checkExplanation:'No. More sounds can fit within the same spacing between beats. The rhythm pattern can become busier while the pulse stays steady. Try imagining the even beats separately from the sounds around them.',
+      }) ]},
   ];
 }
 const snapshot = <T>(value:T):T => structuredClone(value);

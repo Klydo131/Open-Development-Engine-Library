@@ -5,7 +5,9 @@ import type {GroupWorkspace} from './groups.ts';
 import {validatePortalMedia,type PortalMedia,type PortalMediaStore} from './media.ts';
 export * from './groups.ts';
 export * from './media.ts';
-export type Material = Readonly<{id: string; title: string; text: string; sourceUrl: string; credit: string; rights: string; mediaType?: 'text'|'document'|'audio'|'video'|'link'|'image'; attachment?:PortalMedia}>;
+export type TeachingGuide = Readonly<{goal:string;connection:string;workedExample:string;practice:string;checkQuestion:string;checkExplanation:string}>;
+export const LESSON_GUIDE_LIMITS = Object.freeze({goal:500,connection:2000,workedExample:6000,practice:2000,checkQuestion:2000,checkExplanation:6000});
+export type Material = Readonly<{id: string; title: string; text: string; sourceUrl: string; credit: string; rights: string; mediaType?: 'text'|'document'|'audio'|'video'|'link'|'image'; attachment?:PortalMedia;teaching?:TeachingGuide}>;
 export type Course = Readonly<{id: string; revision: string; title: string; summary: string; language: string; status: 'draft' | 'published'; lessons: readonly Material[]}>;
 export type SupportThread = Readonly<{id: string; learnerId: string; courseId?: string; subject: string; message: string; reply: string; status: 'open' | 'answered'; revision: string}>;
 export type SupportQuestion = Readonly<{courseId?: string; subject: string; message: string}>;
@@ -67,6 +69,11 @@ export function portalSourceUrl(value: unknown): string {
 function bytes(value: unknown, maximum: number) {
   if (new TextEncoder().encode(JSON.stringify(value)).byteLength > maximum) fail();
 }
+export function validateTeachingGuide(value:unknown):TeachingGuide {
+  const fields=Object.keys(LESSON_GUIDE_LIMITS) as (keyof TeachingGuide)[];
+  const guide=object(value,fields);
+  return Object.freeze(Object.fromEntries(fields.map(field=>[field,text(guide[field],LESSON_GUIDE_LIMITS[field])])) as Record<keyof TeachingGuide,string>);
+}
 export function validateCourse(value: unknown): Course {
   const row = object(value, ['id', 'revision', 'title', 'summary', 'language', 'status', 'lessons']);
   if (!Array.isArray(row.lessons) || row.lessons.length > PORTAL_LIMITS.materials || !['draft', 'published'].includes(row.status as string)) return fail();
@@ -74,10 +81,12 @@ export function validateCourse(value: unknown): Course {
   if (!/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/u.test(language) || /[\r\n]/u.test(language)) return fail();
   const ids = new Set<string>();
   const lessons = row.lessons.map(item => {
-    const material = object(item, ['id', 'title', 'text', 'sourceUrl', 'credit', 'rights'], ['mediaType','attachment']);
+    const material = object(item, ['id', 'title', 'text', 'sourceUrl', 'credit', 'rights'], ['mediaType','attachment','teaching']);
     if ('mediaType' in material && !['text','document','audio','video','link','image'].includes(material.mediaType as string)) return fail();
     const id = portalId(material.id); if (ids.has(id)) return fail(); ids.add(id);
-    return Object.freeze({id, title: text(material.title, 160, true), text: text(material.text, PORTAL_LIMITS.materialText), sourceUrl: portalSourceUrl(material.sourceUrl), credit: text(material.credit, 500), rights: text(material.rights, 500), ...('mediaType' in material ? {mediaType: material.mediaType as Material['mediaType']} : {}), ...('attachment' in material ? {attachment:validatePortalMedia(material.attachment)} : {})});
+    const teaching='teaching' in material?validateTeachingGuide(material.teaching):undefined;
+    if(row.status==='published'&&teaching&&(['goal','workedExample','practice','checkQuestion','checkExplanation'] as const).some(field=>!teaching[field].trim()))throw new Error('Complete the learning goal, worked example, practice task, check question and explanation before publishing this teaching guide.');
+    return Object.freeze({id, title: text(material.title, 160, true), text: text(material.text, PORTAL_LIMITS.materialText), sourceUrl: portalSourceUrl(material.sourceUrl), credit: text(material.credit, 500), rights: text(material.rights, 500), ...('mediaType' in material ? {mediaType: material.mediaType as Material['mediaType']} : {}), ...('attachment' in material ? {attachment:validatePortalMedia(material.attachment)} : {}), ...(teaching?{teaching}:{})});
   });
   const course: Course = Object.freeze({id: portalId(row.id), revision: portalId(row.revision), title: text(row.title, 160, true), summary: text(row.summary, 2000, true), language, status: row.status as Course['status'], lessons: Object.freeze(lessons)});
   bytes(course, PORTAL_LIMITS.courseBytes); return course;

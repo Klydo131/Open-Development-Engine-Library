@@ -51,6 +51,19 @@ returns boolean language sql immutable security invoker set search_path = '' as 
 $$;
 create function portal_private.attachment_available(p_attachment jsonb) returns boolean
 language sql stable security definer set search_path='' as $$ select false $$;
+create function portal_private.teaching_ok(value jsonb, complete boolean default false) returns boolean
+language plpgsql immutable security invoker set search_path='' as $$
+begin
+  if jsonb_typeof(value) is distinct from 'object' or complete is null then return false; end if;
+  if not value ?& array['goal','connection','workedExample','practice','checkQuestion','checkExplanation']
+    or (value - array['goal','connection','workedExample','practice','checkQuestion','checkExplanation']) <> '{}'::jsonb then return false; end if;
+  return portal_private.text_ok(value->'goal',500,complete)
+    and portal_private.text_ok(value->'connection',2000)
+    and portal_private.text_ok(value->'workedExample',6000,complete)
+    and portal_private.text_ok(value->'practice',2000,complete)
+    and portal_private.text_ok(value->'checkQuestion',2000,complete)
+    and portal_private.text_ok(value->'checkExplanation',6000,complete);
+end $$;
 create function portal_private.materials_ok(items jsonb) returns boolean
 language plpgsql stable security invoker set search_path = '' as $$
 declare item jsonb; ids text[] := '{}'; parsed_id uuid;
@@ -59,7 +72,7 @@ begin
   for item in select value from jsonb_array_elements(items) loop
     if jsonb_typeof(item) is distinct from 'object' or
       not item ?& array['id','title','text','sourceUrl','credit','rights'] or
-      (item - array['id','title','text','sourceUrl','credit','rights','mediaType','attachment']) <> '{}'::jsonb or
+      (item - array['id','title','text','sourceUrl','credit','rights','mediaType','attachment','teaching']) <> '{}'::jsonb or
       not portal_private.text_ok(item->'id',36,true) or
       (item->>'id') !~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' or
       not portal_private.text_ok(item->'title',160,true) or
@@ -67,6 +80,7 @@ begin
       not portal_private.text_ok(item->'sourceUrl',2048) or
       not portal_private.text_ok(item->'credit',500) or not portal_private.text_ok(item->'rights',500) or
       (item ? 'mediaType' and (jsonb_typeof(item->'mediaType') is distinct from 'string' or item->>'mediaType' not in ('text','document','audio','video','image','link'))) or
+      (item ? 'teaching' and not portal_private.teaching_ok(item->'teaching')) or
       (item ? 'attachment' and not portal_private.attachment_available(item->'attachment'))
     then return false; end if;
     parsed_id := (item->>'id')::uuid;
@@ -176,7 +190,8 @@ begin
     or (p_course->>'status' = 'published' and jsonb_array_length(p_course->'lessons') = 0)
     or (p_course->>'status' = 'published' and exists(select 1 from jsonb_array_elements(p_course->'lessons') item
       where (not portal_private.text_ok(item->'text',20000,true) and item->>'sourceUrl' = '' and not coalesce(portal_private.attachment_available(item->'attachment'),false))
-        or not portal_private.text_ok(item->'credit',500,true) or not portal_private.text_ok(item->'rights',500,true)))
+        or not portal_private.text_ok(item->'credit',500,true) or not portal_private.text_ok(item->'rights',500,true)
+        or (item ? 'teaching' and not portal_private.teaching_ok(item->'teaching',true))))
   then raise exception 'Invalid or oversized course.' using errcode='22023'; end if;
   target_id := (p_course->>'id')::uuid;
   perform (p_course->>'revision')::uuid;

@@ -5,6 +5,10 @@ materials, support, study groups and teacher requests. It is separate from the
 encrypted personal library. Private-room notes, files and passphrases are not
 uploaded or exposed to portal administrators.
 
+Optional [teaching guides](TEACHING-GUIDES.md) structure a lesson around a goal,
+worked example, practice and explanatory question. Learner practice responses
+stay in the mounted screen; sharing for support remains an explicit action.
+
 ## Try the local demonstration
 
 Open `/portal.html` in the local preview. Signed-out visitors see published

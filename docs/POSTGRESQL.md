@@ -5,6 +5,12 @@ and encrypted local storage do not require it. Database examples contain SQL,
 strict TypeScript ports and small server adapters; they include no PostgreSQL
 driver, account server or deployment platform dependency.
 
+For existing installations adding [teaching guides](TEACHING-GUIDES.md), review
+`examples/postgres/upgrade-lesson-guides.sql`. It must run as the existing private
+portal function owner and preserves records, revisions, owners and grants.
+Update both reading clients and server validation before authoring guide-enabled
+courses; older strict readers reject their additional instructional field.
+
 ## Install on a disposable database first
 
 Use a trusted database-owner connection. Provision `anon` and `authenticated`
