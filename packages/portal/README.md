@@ -15,6 +15,15 @@ attachment upload/download. Metadata contains a file ID, type, size and SHA-256;
 file bytes do not travel in course JSON. The server upload example requires a
 configured malware scanner. The package's signature checks are not malware scans.
 
+`Material.teaching` optionally holds a `TeachingGuide`: `goal`, `connection`,
+`workedExample`, `practice`, `checkQuestion` and `checkExplanation`. All are plain
+text; the connection can be empty. `validateTeachingGuide` checks strict shape
+and the exported `LESSON_GUIDE_LIMITS`; `validateCourse` also rejects incomplete
+guides in published courses while permitting partially authored draft guides.
+The existing aggregate byte limit still applies. This content model adds no
+learner answers, grades, identity profile or persistence. See the
+[teaching-guide contract and upgrade procedure](../../docs/TEACHING-GUIDES.md).
+
 See the [PostgreSQL guide](https://github.com/Klydo131/Open-Development-Engine-Library/blob/main/docs/POSTGRESQL.md)
 and [groups/media guide](https://github.com/Klydo131/Open-Development-Engine-Library/blob/main/docs/GROUPS-AND-MEDIA.md)
 for schema order, service ports, authorization and bounded-workspace limits.

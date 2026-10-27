@@ -2,6 +2,11 @@
 
 ## Unreleased — 27 October 2026
 
+- Optional teaching guides give lessons a learning goal, familiar connection,
+  worked example, practice and a reasoning explanation learners can reveal.
+  Administrators can save unfinished guides in draft courses; practice responses
+  stay on the current screen and are not submitted or graded. Existing lessons
+  remain supported, with a data-preserving PostgreSQL validation upgrade.
 - Runtime maintenance checks enforce reviewed security minimums and review
   deadlines, with bounded official advisory checks and executable inventory.
   Daily repository checks and dependency update proposals support patch review;

@@ -25,6 +25,8 @@ unchanged for compatibility.
 - A responsive reference application with guided study, reading controls and locking.
 - A separate course portal with Learner/Admin guides, support, invited study
   groups, discussions, scheduled sessions and private teacher rooms.
+- Optional [structured teaching guides](docs/TEACHING-GUIDES.md) with learning
+  goals, worked examples, practice and learner-controlled reasoning explanations.
 - PostgreSQL schema and server adapters, optional Supabase email accounts, and
   configurable email-invitation and scanned-file services.
 
